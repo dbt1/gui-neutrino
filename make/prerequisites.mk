@@ -70,6 +70,29 @@ $(PLUGIN_DIR):
 	cd $(SOURCE_DIR) && \
 		git clone $(GITORIOUS)/neutrino-hd/neutrino-hd-plugins.git
 
+$(SOURCE_DIR)/neutrino-cst:
+	@echo ' ============================================================================== '
+	@echo "                  Cloning neutrino-cst git repos"
+	@echo ' ============================================================================== '
+	mkdir -p $(SOURCE_DIR)
+	cd $(SOURCE_DIR) && \
+	for g in drivers.git \
+		gui-neutrino.git \
+		libraries-dvbsi.git \
+		libraries-ffmpeg.git \
+		libraries-openthreads-include.git \
+		libraries-openthreads-src.git \
+		libraries-openthreads.git; do \
+		if [ -e $(SOURCE_DIR)/$(PLATFORM)-$$g/.git ]; then \
+			cd $(SOURCE_DIR)/$(PLATFORM)-$$g && git pull origin master; \
+		else \
+			git clone git://c00lstreamtech.de/cst-public-$$g $(PLATFORM)-$$g; \
+		fi; \
+	done
+
+cst-git: $(SOURCE_DIR)/neutrino-cst
+
+#this is the old method for cst-svn, not required
 $(SOURCE_DIR)/svn/COOLSTREAM:
 	mkdir -p $(shell dirname $@)
 	cd $(shell dirname $@) && $(SVNCO)/COOLSTREAM
