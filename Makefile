@@ -17,18 +17,21 @@ include make/environment.mk
 #
 printenv:
 	@echo '============================================================================== '
-	@echo "Build Environment Varibles:"
-	@echo "CROSS_DIR:   $(CROSS_DIR)"
-	@echo "CROSS_BASE:  $(CROSS_BASE)"
-	@echo "TARGET:      $(TARGET)"
-	@echo "BASE_DIR:    $(BASE_DIR)"
-	@echo "BUILD:       $(BUILD)"
-	@echo "PATH:        `type -p fmt>/dev/null&&echo $(PATH)|sed 's/:/ /g' |fmt -65|sed 's/ /:/g; 2,$$s/^/             /;'||echo $(PATH)`"
-	@echo "N_HD_SOURCE: $(N_HD_SOURCE)"
-	@echo "BOXARCH:     $(BOXARCH)"
-	@echo "PLATFORM:    $(PLATFORM)"
+	@echo "Build Environment Variables:"
+	@echo "CROSS_DIR:        $(CROSS_DIR)"
+	@echo "CROSS_BASE:       $(CROSS_BASE)"
+ifeq ($(PLATFORM), coolstream)
+	@echo "CSKVERSION_FULL:  $(CSKVERSION_FULL)"
+endif
+	@echo "TARGET:           $(TARGET)"
+	@echo "BASE_DIR:         $(BASE_DIR)"
+	@echo "BUILD:            $(BUILD)"
+	@echo "PATH:             `type -p fmt>/dev/null&&echo $(PATH)|sed 's/:/ /g' |fmt -65|sed 's/ /:/g; 2,$$s/^/             /;'||echo $(PATH)`"
+	@echo "N_HD_SOURCE:      $(N_HD_SOURCE)"
+	@echo "BOXARCH:          $(BOXARCH)"
+	@echo "PLATFORM:         $(PLATFORM)"
 	@echo "KVERSION:    $(KVERSION)"
-	@echo "MAINTAINER:  $(MAINTAINER)"
+	@echo "MAINTAINER:       $(MAINTAINER)"
 	@echo '============================================================================== '
 	@echo "LOCAL_NEUTRINO_BUILD_OPTIONS:  $(LOCAL_NEUTRINO_BUILD_OPTIONS)"
 	@echo "LOCAL_NEUTRINO_CFLAGS:  $(LOCAL_NEUTRINO_CFLAGS)"

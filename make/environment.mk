@@ -44,6 +44,11 @@ USE_STB_HAL ?= no
 TARGET      ?= arm-cx2450x-linux-gnueabi
 FLAVOUR     ?= neutrino-mp
 BOXARCH     ?= arm
+# manage default used kernel version, is now 2.6.34.13
+ifeq ($(CSKVERSION),)
+CSKVERSION	= 2.6.34.13
+endif
+CSKVERSION_FULL = $(CSKVERSION)-nevis
 endif
 
 ifneq ($(GIT_PROTOCOL), http)
@@ -141,8 +146,11 @@ CONFIGURE = \
 	$(BUILDENV) \
 	./configure $(CONFIGURE_OPTS)
 
+# coolstream
 CSSVN_URL = http://www.coolstreamtech.de/coolstream_public_svn
 CSSVN_CMD = svn --username coolstream --password coolstream --no-auth-cache
+# ---------
+
 ifeq ($(PLATFORM), tripledragon)
 else
 SVN   ?= $(CSSVN_CMD)
@@ -150,8 +158,10 @@ SVNCO ?= $(SVN) co $(CSSVN_URL)
 endif
 
 # shortcuts
+# coolstream
 SVN_TP_LIBS = $(SOURCE_DIR)/svn/THIRDPARTY/libraries
 SVN_TP_APPS = $(SOURCE_DIR)/svn/THIRDPARTY/applications
+# ----------
 TD_SVN = $(SOURCE_DIR)/tdsvn
 
 OPKG_SH_ENV  = PACKAGE_DIR=$(PACKAGE_DIR)
