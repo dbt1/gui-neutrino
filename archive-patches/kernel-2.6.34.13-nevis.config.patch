@@ -1,0 +1,41 @@
+--- a/config-2.6.34.13	2012-09-29 12:56:04.000000000 +0200
++++ b/.config	2012-09-29 13:23:22.000000000 +0200
+@@ -1241,7 +1241,7 @@
+ #
+ # also be needed; see USB_STORAGE Help for more info
+ #
+-CONFIG_USB_STORAGE=m
++CONFIG_USB_STORAGE=y
+ # CONFIG_USB_STORAGE_DEBUG is not set
+ # CONFIG_USB_STORAGE_DATAFAB is not set
+ # CONFIG_USB_STORAGE_FREECOM is not set
+@@ -1420,7 +1420,11 @@
+ # CONFIG_REISERFS_FS is not set
+ # CONFIG_JFS_FS is not set
+ # CONFIG_FS_POSIX_ACL is not set
+-# CONFIG_XFS_FS is not set
++CONFIG_XFS_FS=y
++# CONFIG_XFS_QUOTA is not set
++# CONFIG_XFS_POSIX_ACL is not set
++# CONFIG_XFS_RT is not set
++# CONFIG_XFS_DEBUG is not set
+ # CONFIG_GFS2_FS is not set
+ # CONFIG_OCFS2_FS is not set
+ # CONFIG_BTRFS_FS is not set
+@@ -1432,7 +1436,7 @@
+ CONFIG_INOTIFY_USER=y
+ # CONFIG_QUOTA is not set
+ # CONFIG_AUTOFS_FS is not set
+-# CONFIG_AUTOFS4_FS is not set
++CONFIG_AUTOFS4_FS=m
+ CONFIG_FUSE_FS=m
+ # CONFIG_CUSE is not set
+ 
+@@ -1511,6 +1515,7 @@
+ # CONFIG_NFSD is not set
+ CONFIG_LOCKD=y
+ CONFIG_LOCKD_V4=y
++CONFIG_EXPORTFS=y
+ CONFIG_NFS_COMMON=y
+ CONFIG_SUNRPC=y
+ # CONFIG_RPCSEC_GSS_KRB5 is not set
