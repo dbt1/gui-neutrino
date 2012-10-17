@@ -1,0 +1,26 @@
+diff --git a/Makefile.in b/Makefile.in
+index b74a929..1b17f1c 100644
+--- a/Makefile.in
++++ b/Makefile.in
+@@ -344,7 +344,7 @@ install-lib-samples: $(DESTDIR)$(libdir) install-lib-main
+ 	 done
+ 	@$(install) -m 644 samples/samples.mk "$(DESTDIR)$(libdir)/samples/samples.mk"
+ 
+-KCONFIG_FILES := conf mconf nconf kconfig.mk
++KCONFIG_FILES := conf mconf kconfig.mk
+ install-lib-kconfig: $(DESTDIR)$(libdir) install-lib-main
+ 	@echo "  INST    'kconfig/'"
+ 	@for f in $(KCONFIG_FILES); do                                      \
+diff --git a/kconfig/Makefile b/kconfig/Makefile
+index afaf416..7a70489 100644
+--- a/kconfig/Makefile
++++ b/kconfig/Makefile
+@@ -2,7 +2,7 @@
+ # Hmmm! Cheesy build!
+ # Or: where I can unveil my make-fu... :-]
+ 
+-all: conf mconf nconf
++all: conf mconf
+ 	@true   # Just be silent, you fscking son of a fscking beach...
+ 
+ # Build flags
