@@ -1,0 +1,15 @@
+#!/bin/sh
+/bin/echo "***** linuxrc ******"
+
+#hier USB-Device /dev/sda1...4 angeben, wo das Dateisystem aus dem Flash drauf kopiert wurde
+USBDEV=/dev/sda2
+
+/bin/mkdir -p /tmp/mnt
+/bin/echo mounting $USBDEV...
+if /bin/mount -n $USBDEV /tmp/mnt; then
+       /bin/test -x /tmp/mnt/sbin/init && exec /sbin/chroot /tmp/mnt /sbin/init
+       /bin/echo "no /sbin/init on $USBDEV"
+else
+       /bin/echo "mount failed!"
+fi
+exec /sbin/init
