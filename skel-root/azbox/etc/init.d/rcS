@@ -41,6 +41,9 @@ echo -n $((SEQNUM+1)) > /dev/mdev.seq
 # start up mdev with coldplugging
 mdev -s
 
+# start up mdev with coldplugging
+mdev -s
+
 dmesg -n 4
 # update library cache before running init scripts
 if [ ! -e /etc/ld.so.cache ] || [ /etc/ld.so.conf -nt /etc/ld.so.cache ]; then
