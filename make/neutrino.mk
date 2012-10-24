@@ -57,9 +57,9 @@ N_LDFLAGS =
 N_LDFLAGS += -Wl,-rpath-link,$(TARGETLIB)
 
 # finally we can build outside of the source directory
-N_OBJDIR = $(BUILD_TMP)/$(FLAVOUR)
+#N_OBJDIR = $(BUILD_TMP)/$(FLAVOUR)
 # use this if you want to build inside the source dir - but you don't want that ;)
-# N_OBJDIR = $(N_HD_SOURCE)
+N_OBJDIR = $(N_HD_SOURCE)
 
 $(N_OBJDIR)/config.status: $(NEUTRINO_DEPS) $(MAKE_DIR)/neutrino.mk
 	test -d $(N_OBJDIR) || mkdir -p $(N_OBJDIR)
