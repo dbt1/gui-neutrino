@@ -2,14 +2,25 @@
 #set -x
 
 
-LOGIN=$1
-PW=$2
-REMOTEHOST=$3
+FTPLOGIN=$1
+FTPPASS=$2
+FTPHOST=$3
 REMOTEDIR=$4
 FILES=$5
 
+ncftp -u $FTPLOGIN -p $FTPPASS $FTPHOST <<EOF
+cd ${REMOTEDIR}
+rm neutrino
+quit
+no
+EOF
 
-ncftpput -v -u $LOGIN -p $PW $REMOTEHOST $REMOTEDIR $FILES
+
+ncftpput -v -u $FTPLOGIN -p $FTPPASS $FTPHOST $REMOTEDIR $FILES
+
+
+
+
 
 
 
