@@ -23,6 +23,8 @@
 # PKG_VER	- package Version. @VER@ in the control file is replaced by this.
 # PKG_PROV	- packages provides. @PROV@ in the control file
 # PKG_DEP	- package dependencies. @DEP@ in the control file
+# PKG_NAME	- package name. @NAME@ in the control file
+# PKG_ADDRESS	- package bugreport address or homepage of distributor. @ADDRESS@ in the control file
 #
 # This is intended to be used in Makefiles, so only ever exit with non-zero
 # if there was an error.
@@ -161,6 +163,7 @@ if [ -n "$PKG_PROV" ]; then
 		sed -i "s/@PROV@/$PKG_PROV/" CONTROL/control
 	fi
 fi
+
 # update package requires in the control file
 if [ -n "$PKG_DEP" ]; then
 	if ! grep -q "@DEP@" CONTROL/control; then
@@ -175,10 +178,28 @@ if grep -E '@DEP@|@PROV@|@VER@' CONTROL/control; then
 	exit 1
 fi
 
+# set/update package bugreport address or distributor homepage provides in the control file
+if [ -n "$PKG_ADDRESS" ]; then
+	if ! grep -q "@ADDRESS@" CONTROL/control; then
+		echo "${ME}: WARNING - PKG_ADDRESS set but no @ADDRESS@ in control file" >&2
+	else
+		sed -i "s/@ADDRESS@/$PKG_ADDRESS/" CONTROL/control
+	fi
+fi
+
+# set/update package name provides in the control file
+if [ -n "$PKG_NAME" ]; then
+	if ! grep -q "@NAME@" CONTROL/control; then
+		echo "${ME}: WARNING - PKG_NAME set but no @NAME@ in control file" >&2
+	else
+		sed -i "s/@NAME@/$PKG_NAME/" CONTROL/control
+	fi
+fi
+
 # extract package name and version from control file...
 eval $(awk -F":[ \t]*" \
 	'/^Package:/{print "NAME=\""$2"\""};
-	 /^Version:/{print "VERSION=\""$2"\""}' CONTROL/control)
+	/^Version:/{print "VERSION=\""$2"\""}' CONTROL/control)
 echo "2.0" > debian-binary
 
 # strip binaries

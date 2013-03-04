@@ -1,10 +1,10 @@
-Package: neutrino-hd
-Version: 1.0-1
+Package: @NAME@-hd
+Version: @VER@-1
 Description: The neutrino-HD STB GUI
 Section: extras/servers
 Priority: optional
 Maintainer: @MAINT@
 Architecture: @ARCH@
-Homepage: http://gitorious.org/neutrino-hd/neutrino-hd-experimental
+Homepage: @ADDRESS@
 Source:
 Depends: @DEP@
