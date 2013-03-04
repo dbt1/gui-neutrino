@@ -112,6 +112,7 @@ $(D)/neutrino: $(N_OBJDIR)/config.status $(NEUTRINO_DEPS2)
 neutrino-pkg: $(N_OBJDIR)/config.status $(NEUTRINO_DEPS2) $(NEUTRINO_PKG_DEPS)
 	rm -rf $(PKGPREFIX) $(BUILD_TMP)/neutrino-control
 	$(MAKE) -C $(N_OBJDIR) clean   DESTDIR=$(TARGETPREFIX)
+	#$(MAKE) -C $(N_OBJDIR) DESTDIR=$(TARGETPREFIX)
 	PKG_CONFIG_PATH=$(PKG_CONFIG_PATH) \
 	$(MAKE) -C $(N_OBJDIR) all     DESTDIR=$(TARGETPREFIX)
 	$(MAKE) -C $(N_OBJDIR) install DESTDIR=$(PKGPREFIX)
@@ -138,8 +139,12 @@ endif
 	install -p -m 0755 $(TARGETPREFIX)/bin/fbshot $(PKGPREFIX)/bin/
 	find $(PKGPREFIX)/share/tuxbox/neutrino/locale/ -type f \
 		! -name deutsch.locale ! -name english.locale | xargs --no-run-if-empty rm
-	# ignore the .version file for package  comparison
-	DONT_STRIP=$(NEUTRINO_NOSTRIP) CMP_IGNORE="/.version" $(OPKG_SH) $(BUILD_TMP)/neutrino-control
+
+	# ignore the .version file for package  comparison, set package name, set package version
+	PKG_VER=`cat $(N_HD_SOURCE)/PACKAGE_VERSION_FILE` \
+		DONT_STRIP=$(NEUTRINO_NOSTRIP) CMP_IGNORE="/.version" \
+			PKG_ADDRESS=`cat $(N_HD_SOURCE)/PACKAGE_BUGREPORT_FILE` \
+				PKG_NAME=`cat $(N_HD_SOURCE)/PACKAGE_FILE` $(OPKG_SH) $(BUILD_TMP)/neutrino-control
 	rm -rf $(PKGPREFIX)
 
 neutrino-clean:
