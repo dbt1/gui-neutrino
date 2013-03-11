@@ -14,7 +14,7 @@ SUMIMG   = $(BUILD_TMP)/flashroot-$(PLATFORM)-$(TIME).sum.img
 local-install:
 	# copy local/flash/* into the image...
 	# you can e.g. create local/flash/boot/audio.elf ...
-	@if test -d $(BASE_DIR)/local/flash/; then \
+	if test -d $(BASE_DIR)/local/flash/; then \
 		rsync -avP --exclude=*.*~ $(BASE_DIR)/local/flash/. $(BUILD_TMP)/install; \
 	fi
 ifeq ($(PLATFORM), spark)
