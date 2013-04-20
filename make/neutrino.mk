@@ -139,7 +139,6 @@ endif
 	install -p -m 0755 $(TARGETPREFIX)/bin/fbshot $(PKGPREFIX)/bin/
 	find $(PKGPREFIX)/share/tuxbox/neutrino/locale/ -type f \
 		! -name deutsch.locale ! -name english.locale | xargs --no-run-if-empty rm
-
 	# ignore the .version file for package  comparison, set package name, set package version
 	PKG_VER=`cat $(N_HD_SOURCE)/PACKAGE_VERSION_FILE` \
 		DONT_STRIP=$(NEUTRINO_NOSTRIP) CMP_IGNORE="/.version" \
