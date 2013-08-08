@@ -42,10 +42,10 @@ flashimage: flash-prepare cskernel flash-build
 	set -e;\
 		cd $(BUILD_TMP); \
 		cp zImage.img mtd1-hd1.img; $(BASE_DIR)/scripts/mkmultiboot-hd1.sh . mkimage; rm mtd1-hd1.img; \
-		mv kernel-autoscr-mtd1.img coolstream/kernel.img; \
+		cp zImage.img coolstream/kernel.img; \
 		cp $(SUMIMG) coolstream/system.img
-	@echo; echo
-	ls -l $(BUILD_TMP)/coolstream
+		@echo; echo -e "COOLSTREAM flashroot images are in $(BUILD_TMP)/ and suitable for gui update features:"; ls -l $(BUILD_TMP)/*.img
+		@echo; echo -e "COOLSTREAM flash images for rescue or USB-Update in $(BUILD_TMP)/coolstream.\nCopy this directory onto an USB stick and flash via boot loader.:"; ls -l $(BUILD_TMP)/coolstream/*.img
 endif
 ifeq ($(PLATFORM), spark)
 # you should probably "make system-pkgs" before...
