@@ -31,6 +31,10 @@ start)
 		s/^\(\S\+\)-/\1_/g;
 		p }" /etc/modprobe.conf)
 	im cs_frontpanel
+	/bin/dt -ls01
+	/bin/dt -ls02
+	/bin/dt -c
+	/bin/dt -t"init drivers..."
 	im cnxt_kal
 	im cnxt_base init=$($NEWKERNEL && echo 1 || echo 0)
 	im cnxt_fb cnxtfb_standalone=1 cnxtfb_width=1280 cnxtfb_height=720
