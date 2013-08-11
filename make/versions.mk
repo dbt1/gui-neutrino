@@ -65,9 +65,13 @@ OPENSSL_VER=0.9.8
 OPENSSL_SUBVER=q
 
 # libffmpeg; complete, cross-platform solution to record, convert and stream audio and video
+# get revision direct from source tree
+ifneq ($(PLATFORM), coolstream)
 FFMPEG_VER=2.1.3
-ifeq ($(PLATFORM), coolstream)
-FFMPEG_VER=1.2
+else
+FFMPEG_GITREV=$(shell if  test -d $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; then $(BASE_DIR)/scripts/opkg-get_git_info.sh $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; fi)
+FFMPEG_VERSION=$(shell if  test -d $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; then cat $(UNCOOL_GIT)/cst-public-libraries-ffmpeg/VERSION; fi)
+FFMPEG_VER=$(FFMPEG_VERSION)-$(FFMPEG_GITREV)
 endif
 
 # libogg; encoding, decoding of the ogg file format

@@ -275,23 +275,45 @@ $(D)/openssl: $(ARCHIVE)/openssl-$(OPENSSL_VER)$(OPENSSL_SUBVER).tar.gz | $(TARG
 	rm -rf $(PKGPREFIX)
 	touch $@
 
-libbluray: $(TARGETPREFIX)/lib/libbluray.so
-$(TARGETPREFIX)/lib/libbluray.so: $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 | $(TARGETPREFIX)
+#libbluray open-source library designed for Blu-Ray Discs playback for media players
+$(D)/libbluray: libbluray-$(LIBBLURAY_VER)
+	touch $@
+$(D)/libbluray-$(LIBBLURAY_VER): $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 $(D)/freetype | $(TARGETPREFIX)
+	rm -rf $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER).tar.bz2 $(PKGPREFIX)
 	$(UNTAR)/libbluray-$(LIBBLURAY_VER).tar.bz2
-	set -e; cd $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER); \
-		$(PATCH)/0001-Optimized-file-I-O-for-chained-usage-with-libavforma.patch; \
-		$(PATCH)/0002-Added-bd_get_clip_infos.patch; \
-		$(PATCH)/0003-Don-t-abort-demuxing-if-the-disc-looks-encrypted.patch; \
-		$(CONFIGURE) --prefix= \
-			--without-libxml2 \
-			--without-freetype \
-			--disable-examples \
-			; \
-		$(MAKE); \
-		make install DESTDIR=$(TARGETPREFIX); \
+	cd $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER) && \
+	$(PATCH)/libbluray-0001-Optimized-file-I-O-for-chained-usage-with-libavforma.patch && \
+	$(PATCH)/libbluray-0003-Added-bd_get_clip_infos.patch && \
+	$(PATCH)/libbluray-0005-Don-t-abort-demuxing-if-the-disc-looks-encrypted.patch && \
+		./bootstrap && \
+			$(CONFIGURE) \
+				--prefix= \
+				--enable-shared \
+				--disable-static \
+				--disable-extra-warnings \
+				--disable-doxygen-doc \
+				--disable-doxygen-dot \
+				--disable-doxygen-html \
+				--disable-doxygen-ps \
+				--disable-doxygen-pdf \
+				--disable-examples \
+				--without-libxml2; \
+			$(MAKE); \
+			$(MAKE) install DESTDIR=$(PKGPREFIX)
+	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
+	rm -fr $(PKGPREFIX)/lib/pkgconfig
+	rm -fr $(PKGPREFIX)/lib/*.la
+	rm -fr $(PKGPREFIX)/include
+	PKG_VER=$(LIBBLURAY_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+		$(OPKG_SH) $(CONTROL_DIR)/libbluray
+	$(REWRITE_LIBTOOL)/libbluray.la
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libbluray.pc
-	$(REMOVE)/libbluray-0.5.0
+	$(REMOVE)/libbluray-$(LIBBLURAY_VER) $(PKGPREFIX)
+	touch $@
 
+# ffmpeg
 ifeq ($(BOXARCH), arm)
 FFMPEG_CONFIGURE  = --arch=arm --cpu=armv6 --disable-neon
 FFMPEG_CONFIGURE += --disable-decoders --disable-parsers --disable-demuxers
@@ -342,17 +364,23 @@ FFMPEG_CONFIGURE += --enable-encoder=mpeg2video --enable-muxer=mpeg2video
 FFMPEG_CONFIGURE += --disable-bsfs
 FFMPEG_CONFIGURE += --disable-network
 endif
-$(D)/ffmpeg: $(D)/ffmpeg-$(FFMPEG_VER)
-	touch $@
-$(D)/ffmpeg-$(FFMPEG_VER): $(ARCHIVE)/ffmpeg-$(FFMPEG_VER).tar.bz2 | $(TARGETPREFIX)
+
 ifeq ($(PLATFORM), coolstream)
-	$(MAKE) $(TARGETPREFIX)/lib/libbluray.so
-	if ! test -d $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; then \
-		make $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; \
-	fi
-	rm -rf $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
+$(D)/ffmpeg: ffmpeg-uncool-git $(D)/ffmpeg-$(FFMPEG_VER)
+else
+$(D)/ffmpeg: $(D)/ffmpeg-$(FFMPEG_VER)
+endif
+	touch $@
+
+FFMPEG_REMOVE=rm -rf $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
+
+ifeq ($(PLATFORM), coolstream)
+$(D)/ffmpeg-$(FFMPEG_VER): $(TARGETPREFIX)
+	$(FFMPEG_REMOVE)
 	cp -a $(UNCOOL_GIT)/cst-public-libraries-ffmpeg $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
 else
+$(D)/ffmpeg-$(FFMPEG_VER): $(ARCHIVE)/ffmpeg-$(FFMPEG_VER).tar.bz2 | $(TARGETPREFIX)
+	$(FFMPEG_REMOVE)
 	$(UNTAR)/ffmpeg-$(FFMPEG_VER).tar.bz2
 endif
 	set -e; cd $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER); \
@@ -360,19 +388,27 @@ endif
 		sed -i -e 's/__DATE__/""/' -e 's/__TIME__/""/' cmdutils.c; \
 		./configure \
 			--disable-encoders \
-			--disable-muxers --disable-ffplay --disable-ffserver \
 			--disable-protocols \
+			--disable-muxers \
+			--disable-ffplay \
+			--disable-ffserver \
 			$(FFMPEG_CONFIGURE) \
-			--enable-decoder=dvbsub --enable-demuxer=mpegps \
-			--disable-devices --disable-mmx --disable-altivec \
+			--enable-decoder=dvbsub \
+			--enable-demuxer=mpegps \
+			--disable-devices \
+			--disable-mmx \
+			--disable-altivec \
 			--enable-protocol=file \
-			--disable-zlib --enable-bzlib \
+			--disable-zlib \
+			--enable-bzlib \
 			--disable-ffprobe \
-			--disable-static --enable-shared \
+			--disable-static \
+			--enable-shared \
 			--enable-cross-compile \
 			--cross-prefix=$(TARGET)- \
 			--target-os=linux \
 			--enable-debug \
+			--enable-stripping \
 			--disable-doc \
 			--extra-cflags="$(TARGET_CFLAGS)" \
 			--extra-ldflags="$(TARGET_LDFLAGS) `pkg-config --libs libbluray` -ldl" \
@@ -393,8 +429,10 @@ endif
 	PKG_VER=$(FFMPEG_VER) PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
 		$(OPKG_SH) $(CONTROL_DIR)/ffmpeg
 	$(REMOVE)/ffmpeg-$(FFMPEG_VER) $(PKGPREFIX)
-	touch $@
+	touch $(D)/ffmpeg-$(FFMPEG_VER)
+# ffmpeg end
 
+# libass
 $(D)/libass: $(ARCHIVE)/libass-$(LIBASS_VER).tar.gz $(D)/freetype| $(TARGETPREFIX)
 	$(UNTAR)/libass-$(LIBASS_VER).tar.gz
 	set -e; cd $(BUILD_TMP)/libass-$(LIBASS_VER); \

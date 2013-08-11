@@ -147,8 +147,15 @@ $(ARCHIVE)/jpegsrc.v6b.tar.gz:
 $(ARCHIVE)/boost_$(BOOST_VER).tar.bz2:
 	$(WGET) http://downloads.sourceforge.net/project/boost/boost/$(BOOST_MAJOR).$(BOOST_MINOR).$(BOOST_MICRO)/boost_$(BOOST_VER).tar.bz2
 
+ifneq ($(PLATFORM), coolstream)
 $(ARCHIVE)/ffmpeg-$(FFMPEG_VER).tar.bz2:
 	$(WGET) http://www.ffmpeg.org/releases/ffmpeg-$(FFMPEG_VER).tar.bz2
+else
+ffmpeg-uncool-git:
+	if ! test -d $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; then \
+		make $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; \
+	fi
+endif
 
 $(ARCHIVE)/flac-1.2.1.tar.gz:
 	$(WGET) http://prdownloads.sourceforge.net/sourceforge/flac/flac-1.2.1.tar.gz
