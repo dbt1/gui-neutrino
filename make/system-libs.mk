@@ -365,12 +365,13 @@ FFMPEG_CONFIGURE += --disable-bsfs
 FFMPEG_CONFIGURE += --disable-network
 endif
 
+ffmpeg: $(D)/ffmpeg-$(FFMPEG_VER)
+
 ifeq ($(PLATFORM), coolstream)
 $(D)/ffmpeg: ffmpeg-uncool-git $(D)/ffmpeg-$(FFMPEG_VER)
 else
 $(D)/ffmpeg: $(D)/ffmpeg-$(FFMPEG_VER)
 endif
-	touch $@
 
 FFMPEG_REMOVE=rm -rf $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
 
@@ -429,6 +430,7 @@ endif
 	PKG_VER=$(FFMPEG_VER) PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
 		$(OPKG_SH) $(CONTROL_DIR)/ffmpeg
 	$(REMOVE)/ffmpeg-$(FFMPEG_VER) $(PKGPREFIX)
+	touch $(D)/ffmpeg
 	touch $(D)/ffmpeg-$(FFMPEG_VER)
 # ffmpeg end
 
