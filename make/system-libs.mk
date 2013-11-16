@@ -824,7 +824,9 @@ rmfp_player: mrua
 	rm -rf $(PKGPREFIX)
 
 #libsigc++: typesafe Callback Framework for C++
-$(D)/libsigc++: $(ARCHIVE)/libsigc++-$(LIBSIGCPP_VER).tar.xz | $(TARGETPREFIX)
+$(D)/libsigc++: libsigc++-$(LIBSIGCPP_VER)
+	touch $@
+$(D)/libsigc++-$(LIBSIGCPP_VER): $(ARCHIVE)/libsigc++-$(LIBSIGCPP_VER).tar.xz | $(TARGETPREFIX)
 	rm -rf $(PKGPREFIX)
 	$(UNTAR)/libsigc++-$(LIBSIGCPP_VER).tar.xz
 	set -e; cd $(BUILD_TMP)/libsigc++-$(LIBSIGCPP_VER); \
