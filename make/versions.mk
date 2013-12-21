@@ -265,6 +265,9 @@ LCD4LINUX_VER=0.10.0
 LCD4LINUX_SVN=1184
 LCD4LINUX_SVN_VER=$(LCD4LINUX_VER)+svnr$(LCD4LINUX_SVN)
 
+#xupnpd; an eXtensible UPnP agent
+XUPNP_SVN=387
+
 ##################################
 # devel-tools; make/devel-tools.mk
 ##################################

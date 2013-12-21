@@ -1,0 +1,19 @@
+--- a/Makefile	2013-09-21 14:20:16.626558407 +0200
++++ b/Makefile	2013-09-21 14:31:17.102567963 +0200
+@@ -58,12 +58,10 @@
+ 
+ 
+ embedded:
+-	export PATH
+-	export STAGING_DIR
+-	make -C $(LUA) CC=$(SDK)/gcc a MYCFLAGS='$(LUAMYCFLAGS)'
+-	$(SDK)/gcc -O2 -c -o md5.o md5c.c
+-	$(SDK)/gcc $(CFLAGS) -DWITH_URANDOM -o xupnpd-$(TARGET) $(SRC) md5.o -llua -lm -ldl
+-	$(SDK)/strip xupnpd-$(TARGET)
++	make -C $(LUA) CC=$(PREFIX)-gcc a MYCFLAGS='$(LUAMYCFLAGS)'
++	$(PREFIX)-gcc -O2 -c -o md5.o md5c.c
++	$(PREFIX)-gcc $(CFLAGS) -DWITH_URANDOM -o xupnpd $(SRC) md5.o -llua -lm -ldl
++	$(PREFIX)-strip xupnpd
+ 
+ clean:
+ 	make -C $(LUA) clean

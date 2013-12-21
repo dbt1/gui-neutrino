@@ -312,6 +312,13 @@ $(ARCHIVE)/vtuner-apps-rel2.1.tar.bz2:
 $(ARCHIVE)/xfsprogs-$(XFSPROGS-VER).tar.gz:
 	$(WGET) http://ftp.gwdg.de/pub/linux/misc/xfs/xfs/cmd_tars/xfsprogs-$(XFSPROGS-VER).tar.gz
 
+$(ARCHIVE)/xupnpd_r$(XUPNP_SVN).tar.gz:
+	set -e; cd $(BUILD_TMP); \
+		rm -rf xupnpd_r$(XUPNP_SVN); \
+		svn co -r$(XUPNP_SVN) http://tsdemuxer.googlecode.com/svn/trunk/xupnpd xupnpd_r$(XUPNP_SVN); \
+		tar cvpzf $@ xupnpd_r$(XUPNP_SVN)
+	$(REMOVE)/xupnpd_r$(XUPNP_SVN)
+
 $(ARCHIVE)/zlib-$(ZLIB_VER).tar.bz2:
 	$(WGET) http://downloads.sourceforge.net/project/libpng/zlib/$(ZLIB_VER)/zlib-$(ZLIB_VER).tar.bz2
 
