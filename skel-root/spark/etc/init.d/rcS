@@ -1,5 +1,5 @@
 #!/bin/sh
-export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/opt/pkg/sbin
+export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/opt/pkg/sbin:/opt/pkg/bin
 # the default "vt102" is crap.
 export TERM=linux
 
