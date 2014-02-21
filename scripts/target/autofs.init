@@ -55,7 +55,7 @@ case $1 in
 	start)
 		module_load
 		# automount needs /var/lock or it will exit silently
-		[ ! -d /var/lock ] && mkdir -p /var/lock
+		[ ! -d /var/lock ] && ln -s /tmp /var/lock
 		echo "starting the automounter..."
 		automount $DAEMON_PARAMS
 		;;
