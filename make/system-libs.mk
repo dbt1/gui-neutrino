@@ -324,7 +324,7 @@ FFMPEG_CONFIGURE += --enable-parser=h264 --enable-parser=vc1 --enable-parser=dvd
 FFMPEG_CONFIGURE += --enable-decoder=dca --enable-decoder=dvdsub --enable-decoder=dvbsub
 FFMPEG_CONFIGURE += --enable-decoder=text --enable-decoder=srt --enable-decoder=subrip
 FFMPEG_CONFIGURE += --enable-decoder=subviewer --enable-decoder=subviewer1
-FFMPEG_CONFIGURE += --enable-decoder=xsub --enable-decoder=pgssub
+FFMPEG_CONFIGURE += --enable-decoder=xsub --enable-decoder=pgssub --enable-decoder=pcm_s16le_planar --enable-decoder=pcm_s16le
 FFMPEG_CONFIGURE += --enable-demuxer=aac --enable-demuxer=ac3
 FFMPEG_CONFIGURE += --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=vc1
 FFMPEG_CONFIGURE += --enable-demuxer=mpegts --enable-demuxer=mpegtsraw --enable-demuxer=mpegps
