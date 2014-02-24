@@ -551,21 +551,70 @@ $(D)/libglib-$(GLIB_VER): $(ARCHIVE)/glib-$(GLIB_VER).tar.xz $(D)/zlib $(D)/libf
 	$(REMOVE)/glib-$(GLIB_VER) $(PKGPREFIX)
 	touch $@
 
-$(D)/libxml2: $(D)/zlib $(ARCHIVE)/libxml2-$(LIBXML2_VER).tar.gz | $(TARGETPREFIX)
+#Libxslt is the XSLT C library developed for the GNOME project. XSLT itself is a an XML language to define transformation for XML
+$(D)/libxslt: libxslt-$(LIBXLST_VER)
+	touch $@
+$(D)/libxslt-$(LIBXLST_VER): libxml2 $(ARCHIVE)/libxslt-$(LIBXLST_VER).tar.gz | $(TARGETPREFIX)
+	rm -rf $(PKGPREFIX)
+	$(UNTAR)/libxslt-$(LIBXLST_VER).tar.gz
+	set -e; cd $(BUILD_TMP)/libxslt-$(LIBXLST_VER) && \
+		$(CONFIGURE) \
+			--prefix= \
+			--enable-shared \
+			--disable-static \
+			--datarootdir=/.remove \
+			--without-crypto \
+			--without-python \
+		$(MAKE) ; \
+		$(MAKE) install DESTDIR=$(TARGETPREFIX)
+	mkdir -p $(PKGPREFIX)/lib
+	cp -a $(TARGETPREFIX)/lib/libxslt.* $(TARGETPREFIX)/lib/libexslt.* $(PKGPREFIX)/lib
+	rm -rf $(TARGETPREFIX)/.remove
+	$(REWRITE_LIBTOOL)/libexslt.la
+	$(REWRITE_LIBTOOL)/libxslt.la
+	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libexslt.pc
+	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libxslt.pc
+	rm -rf $(TARGETPREFIX)/lib/libxslt-plugins/
+	rm -rf $(TARGETPREFIX)/lib/xml2Conf.sh
+	rm -rf $(TARGETPREFIX)/lib/xsltConf.sh
+	rm -rf $(TARGETPREFIX)/bin/xml2-config
+	rm -rf $(TARGETPREFIX)/bin/xslt-config
+	PKG_VER=$(LIBXLST_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+			$(OPKG_SH) $(CONTROL_DIR)/libxslt
+	$(REMOVE)/libxslt-$(LIBXLST_VER)
+	touch $@
+
+# libxml2
+$(D)/libxml2: libxml2-$(LIBXML2_VER)
+	touch $@
+$(D)/libxml2-$(LIBXML2_VER): $(D)/zlib $(ARCHIVE)/libxml2-$(LIBXML2_VER).tar.gz | $(TARGETPREFIX)
 	$(UNTAR)/libxml2-$(LIBXML2_VER).tar.gz
 	set -e; cd $(BUILD_TMP)/libxml2-$(LIBXML2_VER); \
-		$(CONFIGURE) --prefix= \
+		$(CONFIGURE)  \
+			--prefix= \
+			--enable-shared \
+			--disable-static \
+			--datarootdir=/.remove \
 			--without-python \
-			; \
+			--without-debug \
+			--without-sax1 \
+			--without-legacy \
+			--without-catalog \
+			--without-docbook \
+			--without-lzma \
+			--without-schematron && \
 		$(MAKE) ; \
 		$(MAKE) install DESTDIR=$(PKGPREFIX)
-	cd $(PKGPREFIX)/share && rm -rf doc gtk-doc man
+	#cd $(PKGPREFIX)/share
 	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
+	ln -sf ./libxml2/libxml $(TARGETPREFIX)/include/libxml
 	mv $(TARGETPREFIX)/bin/xml2-config $(HOSTPREFIX)/bin
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libxml-2.0.pc $(HOSTPREFIX)/bin/xml2-config
 	sed -i 's/^\(Libs:.*\)/\1 -lz/' $(PKG_CONFIG_PATH)/libxml-2.0.pc
 	$(REWRITE_LIBTOOL)/libxml2.la
-	cd $(PKGPREFIX); rm -r [^l]* lib/*[^0-9]
+	cd $(PKGPREFIX); rm -rf [^l]* lib/*[^0-9]
 	PKG_VER=$(LIBXML2_VER) \
 		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
 		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \

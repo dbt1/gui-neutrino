@@ -276,9 +276,7 @@ $(D)/openssl: $(ARCHIVE)/openssl-$(OPENSSL_VER)$(OPENSSL_SUBVER).tar.gz | $(TARG
 	touch $@
 
 #libbluray open-source library designed for Blu-Ray Discs playback for media players
-$(D)/libbluray: libbluray-$(LIBBLURAY_VER)
-	touch $@
-$(D)/libbluray-$(LIBBLURAY_VER): $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 $(D)/freetype | $(TARGETPREFIX)
+$(D)/libbluray): $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 | $(TARGETPREFIX)
 	rm -rf $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER).tar.bz2 $(PKGPREFIX)
 	$(UNTAR)/libbluray-$(LIBBLURAY_VER).tar.bz2
 	cd $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER) && \
@@ -297,7 +295,8 @@ $(D)/libbluray-$(LIBBLURAY_VER): $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 $
 				--disable-doxygen-ps \
 				--disable-doxygen-pdf \
 				--disable-examples \
-				--without-libxml2; \
+				--without-libxml2 \
+				--without-freetype; \
 			$(MAKE); \
 			$(MAKE) install DESTDIR=$(PKGPREFIX)
 	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
@@ -376,7 +375,7 @@ endif
 FFMPEG_REMOVE=rm -rf $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
 
 ifeq ($(PLATFORM), coolstream)
-$(D)/ffmpeg-$(FFMPEG_VER): $(TARGETPREFIX)
+$(D)/ffmpeg-$(FFMPEG_VER): $(D)/libbluray | $(TARGETPREFIX)
 	$(FFMPEG_REMOVE)
 	cp -a $(UNCOOL_GIT)/cst-public-libraries-ffmpeg $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER)
 else
@@ -411,9 +410,10 @@ endif
 			--enable-debug \
 			--enable-stripping \
 			--disable-doc \
-			--extra-cflags="$(TARGET_CFLAGS)" \
-			--extra-ldflags="$(TARGET_LDFLAGS) `pkg-config --libs libbluray` -ldl" \
-			--prefix=/; \
+			--extra-ldflags="-lfreetype -lpng -lz -L$(TARGETPREFIX)/lib" \
+			--extra-cflags="-I$(TARGETPREFIX)/include" \
+			--prefix=/ \
+			; \
 		$(MAKE); \
 		make install DESTDIR=$(PKGPREFIX)
 	rm -rf $(PKGPREFIX)/share/ffmpeg
@@ -429,7 +429,7 @@ endif
 	rm -rf $(PKGPREFIX)/include $(PKGPREFIX)/lib/pkgconfig $(PKGPREFIX)/lib/*.so $(PKGPREFIX)/.remove
 	PKG_VER=$(FFMPEG_VER) PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
 		$(OPKG_SH) $(CONTROL_DIR)/ffmpeg
-	$(REMOVE)/ffmpeg-$(FFMPEG_VER) $(PKGPREFIX)
+		$(REMOVE)/ffmpeg-$(FFMPEG_VER) $(PKGPREFIX)
 	touch $(D)/ffmpeg
 	touch $(D)/ffmpeg-$(FFMPEG_VER)
 # ffmpeg end
@@ -847,5 +847,45 @@ $(D)/libsigc++-$(LIBSIGCPP_VER): $(ARCHIVE)/libsigc++-$(LIBSIGCPP_VER).tar.xz | 
 	$(REMOVE)/libsigc++-$(LIBSIGCPP_VER)
 	rm -rf $(PKGPREFIX)
 	touch $@
+
+
+#libbluray open-source library designed for Blu-Ray Discs playback for media players
+$(D)/libbluray: libbluray-$(LIBBLURAY_VER)
+	touch $@
+$(D)/libbluray-$(LIBBLURAY_VER): $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 $(D)/freetype | $(TARGETPREFIX)
+	rm -rf $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER).tar.bz2 $(PKGPREFIX)
+	$(UNTAR)/libbluray-$(LIBBLURAY_VER).tar.bz2
+	cd $(BUILD_TMP)/libbluray-$(LIBBLURAY_VER) && \
+	$(PATCH)/libbluray-0001-Optimized-file-I-O-for-chained-usage-with-libavforma.patch && \
+	$(PATCH)/libbluray-0003-Added-bd_get_clip_infos.patch && \
+	$(PATCH)/libbluray-0005-Don-t-abort-demuxing-if-the-disc-looks-encrypted.patch && \
+		./bootstrap && \
+			$(CONFIGURE) \
+				--prefix= \
+				--enable-shared \
+				--disable-static \
+				--disable-extra-warnings \
+				--disable-doxygen-doc \
+				--disable-doxygen-dot \
+				--disable-doxygen-html \
+				--disable-doxygen-ps \
+				--disable-doxygen-pdf \
+				--disable-examples \
+				--without-libxml2; \
+			$(MAKE); \
+			$(MAKE) install DESTDIR=$(PKGPREFIX)
+	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
+	rm -fr $(PKGPREFIX)/lib/pkgconfig
+	rm -fr $(PKGPREFIX)/lib/*.la
+	rm -fr $(PKGPREFIX)/include
+	PKG_VER=$(LIBBLURAY_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+		$(OPKG_SH) $(CONTROL_DIR)/libbluray
+	$(REWRITE_LIBTOOL)/libbluray.la
+	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libbluray.pc
+	$(REMOVE)/libbluray-$(LIBBLURAY_VER) $(PKGPREFIX)
+	touch $@
+
 
 PHONY += ncurses-prereq rmfp_player

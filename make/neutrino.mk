@@ -1,6 +1,6 @@
 #Makefile to build NEUTRINO
 
-NEUTRINO_DEPS  = libcurl libid3tag libmad freetype libjpeg giflib ffmpeg libdvbsi++ libsigc++
+NEUTRINO_DEPS  = libcurl libid3tag libmad freetype libjpeg giflib ffmpeg libdvbsi++ libsigc++ 
 NEUTRINO_DEPS += openthreads
 NEUTRINO_DEPS += lua
 NEUTRINO_PKG_DEPS =

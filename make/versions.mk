@@ -221,7 +221,7 @@ NBENCH_BYTE-VER=2.2.3
 # libupnp; a portable open source UPnP development kit
 LIBUPNP_VER=1.6.17
 
-LIBXML2_VER=2.8.0
+LIBXML2_VER=2.9.1
 
 # dropbear; a relatively small SSH 2 server and client
 DROPBEAR-VER=0.53.1
@@ -290,4 +290,9 @@ LIBSIGCPP_VER=$(LIBSIGCPP_MAJOR).$(LIBSIGCPP_MINOR).$(LIBSIGCPP_MICRO)
 #djmount: mount MediaServers content as a Linux filesystem 
 DJMOUNT_VER=0.71
 
-LIBBLURAY_VER = 0.5.0
+#Libxslt is the XSLT C library developed for the GNOME project. XSLT itself is a an XML language to define transformation for XML
+LIBXLST_VER=1.1.28
+
+#libbluray open-source library designed for Blu-Ray Discs playback for media players
+LIBBLURAY_VER=0.5.0
+

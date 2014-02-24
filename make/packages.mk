@@ -272,6 +272,15 @@ install-pkgs: prepare-pkginstall
 	test -d $(BUILD_TMP)/install/opt/pkg/lib && \
 		echo "/opt/pkg/lib" > $(BUILD_TMP)/install/etc/ld.so.conf || true
 
+# install-pkgs remove everything...
+remove-pkgs:
+	mkdir -p $(BUILD_TMP)/install/usr/lib/opkg
+	for i in `ls $(PACKAGE_DIR)`; do \
+		echo opkg-cl -f $(BUILD_TMP)/opkg.conf -o $(BUILD_TMP)/install remove $(PACKAGE_DIR)/$$i ; \
+		#opkg-cl -f $(PATCHES)/opkg.conf -o $(BUILD_TMP)/install remove $(PACKAGE_DIR)/$$i ; \
+	done;
+	
+
 # minimal-system-pkgs allows booting, not much else
 minimal-system-pkgs: glibc-pkg aaa_base-pkg busybox procps opkg prepare-pkginstall
 	opkg-cl -f $(BUILD_TMP)/opkg.conf -o $(BUILD_TMP)/install update

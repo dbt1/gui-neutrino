@@ -365,3 +365,11 @@ $(ARCHIVE)/xmlto-$(XMLTO_VER).tar.gz:
 $(ARCHIVE)/libsigc++-$(LIBSIGCPP_VER).tar.xz:
 	$(WGET) http://ftp.gnome.org/pub/GNOME/sources/libsigc++/$(LIBSIGCPP_MAJOR).$(LIBSIGCPP_MINOR)/libsigc++-$(LIBSIGCPP_VER).tar.xz
 
+#Libxslt is the XSLT C library developed for the GNOME project. XSLT itself is a an XML language to define transformation for XML
+$(ARCHIVE)/libxslt-$(LIBXLST_VER).tar.gz:
+	$(WGET) ftp://xmlsoft.org/libxml2/libxslt-$(LIBXLST_VER).tar.gz
+
+#libbluray open-source library designed for Blu-Ray Discs playback for media players
+$(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2: | $(HOSTPREFIX)/bin/get-git-archive.sh
+	get-git-archive.sh git://git.videolan.org/libbluray.git $(LIBBLURAY_VER) $(notdir $@) $(ARCHIVE)
+
