@@ -1,5 +1,5 @@
---- a/xupnpd.lua	2014-02-16 22:16:12.000000000 +0100
-+++ b/xupnpd.lua	2014-02-16 22:31:28.000000000 +0100
+--- a/xupnpd.lua	2014-05-01 16:44:16.000000000 +0200
++++ b/xupnpd.lua	2014-05-01 16:51:30.424628163 +0200
 @@ -1,13 +1,13 @@
  cfg={}
  
@@ -38,7 +38,7 @@
  
  -- 'cfg.proxy' enables proxy for injection DLNA headers to stream
  -- 0-off, 1-radio, 2-radio/TV
-@@ -51,13 +51,14 @@
+@@ -51,16 +51,17 @@
  cfg.dlna_subscribe_ttl=1800
  
  -- group by 'group-title'
@@ -54,7 +54,11 @@
 +cfg.name=io.popen("uname -n"):read("*l")..'-xupnpd'
  
  -- static device UUID, '60bd2fb3-dabe-cb14-c766-0e319b54c29a' for example or nil
- cfg.uuid='60bd2fb3-dabe-cb14-c766-0e319b54c29a'
+-cfg.uuid='60bd2fb3-dabe-cb14-c766-0e319b54c29a'
++cfg.uuid=''
+ 
+ -- max url cache size
+ cfg.cache_size=8
 @@ -72,12 +73,14 @@
  cfg.default_mime_type='mpeg'
  
@@ -90,19 +94,18 @@
  --    { 'gametrailers',   'ps3',                   'GT - PS3' },
  --    { 'giantbomb',      'all',                  'GiantBomb - All' },
  --    { 'dreambox',       'http://192.168.0.1:8001/','Dreambox1' },
-+    { 'coolstream',     'localhost', 'Tank' },
-+--    { 'coolstream',       '172.16.1.10', 'NEO' },
++    { 'coolstream',     'localhost', 'CST' },
++--    { 'coolstream',       '172.16.1.10', 'CST-Remote' },
  }
  
  -- log ident, pid file end www root
-@@ -107,8 +112,9 @@
+@@ -107,8 +112,8 @@
  cfg.tmp_path='/tmp/'
  cfg.plugin_path='./plugins/'
  cfg.config_path='./config/'
 -cfg.playlists_path='./playlists/'
 ---cfg.feeds_path='/tmp/xupnpd-feeds/'
-+cfg.playlists_path='/tmp/playlists/'
-+--cfg.playlists_path='./playlists/'
++cfg.playlists_path='./playlists/'
 +cfg.feeds_path='/tmp/xupnpd-feeds/'
  cfg.ui_path='./ui/'
  cfg.drive=''                    -- reload playlists only if drive state=active/idle, example: cfg.drive='/dev/sda'
