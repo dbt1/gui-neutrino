@@ -243,8 +243,8 @@ $(ARCHIVE)/busybox-$(BUSYBOX_VER).tar.bz2:
 $(ARCHIVE)/busybox-snapshot.tar.bz2:
 	$(WGET) http://busybox.net/downloads/snapshots/busybox-snapshot.tar.bz2
 
-$(ARCHIVE)/opkg-$(OPKG_VER).tar.gz:
-	$(WGET) http://opkg.googlecode.com/files/opkg-$(OPKG_VER).tar.gz
+$(ARCHIVE)/opkg-$(OPKG_VER).tar.bz2: | $(HOSTPREFIX)/bin/get-git-archive.sh
+	get-git-archive.sh git://git.yoctoproject.org/opkg v$(OPKG_VER) $(notdir $@) $(ARCHIVE)
 
 
 $(ARCHIVE)/opkg-$(OPKG_SVN_VER).tar.gz:
