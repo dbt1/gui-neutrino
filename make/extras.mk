@@ -873,6 +873,7 @@ $(D)/xupnpd: $(D)/liblua $(ARCHIVE)/xupnpd_r$(XUPNP_SVN).tar.gz $(PLUGIN_DIR)/$(
 	set -e; cd $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src; \
 		$(PATCH)/xupnpd-crossbuild.diff; \
 		$(PATCH)/xupnpd_cst.diff; \
+		$(PATCH)/xupnpd-fix-memleak-on-coolstream-boxes.patch; \
 		make embedded PREFIX=$(TARGET) LUAFLAGS="-I$(TARGETPREFIX)/include -L$(TARGETLIB)"
 	rm -rf $(PKGPREFIX)
 	mkdir -p $(PKGPREFIX)/bin
