@@ -53,7 +53,7 @@ NEUTRINO_DEPS2 += $(TARGETPREFIX)/bin/fbshot
 # the original build script links against openssl, but it is not needed at all.
 # libcurl is picked up by configure anyway, so not needed here.
 # N_LDFLAGS  = -L$(TARGETPREFIX)/lib -lcurl -lssl -lcrypto -ldl
-N_LDFLAGS =
+N_LDFLAGS = -L$(TARGETPREFIX)/lib
 N_LDFLAGS += -Wl,-rpath-link,$(TARGETLIB)
 
 # finally we can build outside of the source directory
