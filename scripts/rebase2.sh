@@ -6,6 +6,7 @@
 #
 # parameters:
 # $1 = branch name to which you rebase
+# $2 = dryrun
 #
 
 # Note: It's important that your lokal branches have a canonical name structure, see examples!
@@ -39,7 +40,6 @@ cd $BASEPATH
 
 BRANCHES=`git branch`
 
-echo "$BASEPATH"
 
 for f in  $BRANCHES ; do
 	if [[ "$f" != "$1" ]]; then
@@ -48,14 +48,18 @@ for f in  $BRANCHES ; do
 			echo -e "try to rebase:\n\033[1;33m[$1] ===== into ===>>> [$f]\033[0m"
 			git rebase --abort &>/dev/null
 			git checkout $f
-			git rebase $1
-			echo -e "\n"
+			if [[ "$2" == "dryrun" ]]; then
+				echo -e "rebase [$1] => [$f]"
+			else
+				git rebase $1
+			fi;
+			echo -e "ready\n"
 		fi;
 	fi;
 done
 
 git checkout $1	&>/dev/null
-echo -e "ready\n"
+
 
 
 
