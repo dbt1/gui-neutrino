@@ -149,8 +149,8 @@ endif
 neutrino-clean:
 	-make -C $(N_OBJDIR) uninstall
 	-make -C $(N_OBJDIR) distclean
-	-rm $(N_OBJDIR)/config.status
-	-rm $(D)/neutrino
+	-rm -f $(N_OBJDIR)/config.status
+	-rm -rf $(D)/neutrino
 
 PHONY += neutrino-clean neutrino-system neutrino-system-seife
 
