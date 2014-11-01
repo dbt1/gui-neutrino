@@ -314,27 +314,96 @@ $(D)/libbluray): $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 | $(TARGETPREFIX)
 
 # ffmpeg
 ifeq ($(BOXARCH), arm)
-FFMPEG_CONFIGURE  = --arch=arm --cpu=armv6 --disable-neon
-FFMPEG_CONFIGURE += --disable-decoders --disable-parsers --disable-demuxers
-FFMPEG_CONFIGURE += --disable-ffmpeg --disable-swscale --disable-filters --enable-swresample --disable-postproc
-FFMPEG_CONFIGURE += --enable-parser=aac --enable-parser=aac_latm --enable-parser=ac3 --enable-parser=dca
-FFMPEG_CONFIGURE += --enable-parser=mpeg4video --enable-parser=mpegvideo --enable-parser=mpegaudio
-FFMPEG_CONFIGURE += --enable-parser=h264 --enable-parser=vc1 --enable-parser=dvdsub --enable-parser=dvbsub
-FFMPEG_CONFIGURE += --enable-decoder=dca --enable-decoder=dvdsub --enable-decoder=dvbsub
-FFMPEG_CONFIGURE += --enable-decoder=text --enable-decoder=srt --enable-decoder=subrip
-FFMPEG_CONFIGURE += --enable-decoder=subviewer --enable-decoder=subviewer1
-FFMPEG_CONFIGURE += --enable-decoder=xsub --enable-decoder=pgssub --enable-decoder=pcm_s16le_planar --enable-decoder=pcm_s16le
-FFMPEG_CONFIGURE += --enable-demuxer=aac --enable-demuxer=ac3
-FFMPEG_CONFIGURE += --enable-demuxer=avi --enable-demuxer=mov --enable-demuxer=vc1
-FFMPEG_CONFIGURE += --enable-demuxer=mpegts --enable-demuxer=mpegtsraw --enable-demuxer=mpegps
-FFMPEG_CONFIGURE += --enable-demuxer=mpegvideo --enable-demuxer=wav --enable-demuxer=pcm_s16be
-FFMPEG_CONFIGURE += --enable-demuxer=mp3 --enable-demuxer=pcm_s16le --enable-demuxer=matroska
-FFMPEG_CONFIGURE += --enable-demuxer=flv --enable-demuxer=rm
-FFMPEG_CONFIGURE += --enable-network --enable-protocol=http
-FFMPEG_CONFIGURE += --enable-demuxer=rtsp
-FFMPEG_CONFIGURE += --enable-protocol=rtmp --enable-protocol=rtmpe --enable-protocol=rtmps --enable-protocol=rtmpte --enable-protocol=rtp
-FFMPEG_CONFIGURE += --enable-bsfs
-FFMPEG_CONFIGURE += --enable-libbluray --enable-protocol=bluray
+FFMPEG_CONFIGURE = \
+--disable-parsers \
+--enable-parser=aac \
+--enable-parser=aac_latm \
+--enable-parser=ac3 \
+--enable-parser=dca \
+--enable-parser=mpeg4video \
+--enable-parser=mpegvideo \
+--enable-parser=mpegaudio \
+--enable-parser=h264 \
+--enable-parser=vc1 \
+--enable-parser=dvdsub \
+--enable-parser=dvbsub \
+--enable-parser=flac \
+--enable-parser=vorbis \
+--disable-decoders \
+--enable-decoder=dca \
+--enable-decoder=dvdsub \
+--enable-decoder=dvbsub \
+--enable-decoder=text \
+--enable-decoder=srt \
+--enable-decoder=subrip \
+--enable-decoder=subviewer \
+--enable-decoder=subviewer1 \
+--enable-decoder=xsub \
+--enable-decoder=pgssub \
+--enable-decoder=mp3 \
+--enable-decoder=flac \
+--enable-decoder=vorbis \
+--enable-decoder=aac \
+--enable-decoder=mjpeg \
+--enable-decoder=pcm_s16le \
+--enable-decoder=pcm_s16le_planar \
+--disable-demuxers \
+--enable-demuxer=aac \
+--enable-demuxer=ac3 \
+--enable-demuxer=avi \
+--enable-demuxer=mov \
+--enable-demuxer=vc1 \
+--enable-demuxer=mpegts \
+--enable-demuxer=mpegtsraw \
+--enable-demuxer=mpegps \
+--enable-demuxer=mpegvideo \
+--enable-demuxer=wav \
+--enable-demuxer=pcm_s16be \
+--enable-demuxer=mp3 \
+--enable-demuxer=pcm_s16le \
+--enable-demuxer=matroska \
+--enable-demuxer=flv \
+--enable-demuxer=rm \
+--enable-demuxer=rtsp \
+--enable-demuxer=hls \
+--enable-demuxer=dts \
+--enable-demuxer=wav \
+--enable-demuxer=ogg \
+--enable-demuxer=flac \
+--enable-demuxer=srt \
+--enable-demuxer=hds \
+--disable-encoders \
+--disable-muxers \
+--disable-programs \
+--disable-static \
+--disable-filters \
+--disable-protocols \
+--enable-protocol=file \
+--enable-protocol=http \
+--enable-protocol=rtmp \
+--enable-protocol=rtmpe \
+--enable-protocol=rtmps \
+--enable-protocol=rtmpte \
+--enable-protocol=mmsh \
+--enable-protocol=mmst \
+--enable-bsfs \
+--disable-devices \
+--enable-swresample \
+--disable-postproc \
+--disable-swscale \
+--disable-mmx     \
+--disable-altivec  \
+--enable-network \
+--enable-cross-compile \
+--enable-shared \
+--enable-bzlib \
+--enable-debug \
+--enable-stripping \
+--target-os=linux \
+--arch=arm \
+--disable-neon \
+--enable-libbluray \
+--enable-protocol=bluray
 endif
 ifeq ($(BOXARCH), powerpc)
 FFMPEG_CONFIGURE  = --arch=ppc
@@ -392,7 +461,6 @@ endif
 			--disable-muxers \
 			--disable-ffplay \
 			--disable-ffserver \
-			$(FFMPEG_CONFIGURE) \
 			--enable-decoder=dvbsub \
 			--enable-demuxer=mpegps \
 			--disable-devices \
@@ -410,6 +478,7 @@ endif
 			--enable-debug \
 			--enable-stripping \
 			--disable-doc \
+			$(FFMPEG_CONFIGURE) \
 			--extra-ldflags="-lfreetype -lpng -lz -L$(TARGETPREFIX)/lib" \
 			--extra-cflags="-I$(TARGETPREFIX)/include" \
 			--prefix=/ \
