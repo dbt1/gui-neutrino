@@ -5,7 +5,7 @@ NEUTRINO_DEPS += openthreads
 NEUTRINO_DEPS += lua
 NEUTRINO_PKG_DEPS =
 
-N_CFLAGS   = -Wall -W -Wshadow -ggdb -Os -fno-strict-aliasing -rdynamic -DNEW_LIBCURL $(LOCAL_NEUTRINO_CFLAGS)
+N_CFLAGS   = -Wall -W -Wshadow -Os -ggdb -fno-strict-aliasing -rdynamic -DNEW_LIBCURL $(LOCAL_NEUTRINO_CFLAGS)
 N_CPPFLAGS = -I$(TARGETPREFIX)/include
 ifeq ($(PLATFORM), coolstream)
 N_CPPFLAGS += -DUSE_NEVIS_GXA
@@ -54,7 +54,7 @@ NEUTRINO_DEPS2 += $(TARGETPREFIX)/bin/fbshot
 # libcurl is picked up by configure anyway, so not needed here.
 # N_LDFLAGS  = -L$(TARGETPREFIX)/lib -lcurl -lssl -lcrypto -ldl
 N_LDFLAGS = -L$(TARGETPREFIX)/lib
-N_LDFLAGS += -Wl,-rpath-link,$(TARGETLIB)
+N_LDFLAGS += -Wl,-rpath-link,$(TARGETLIB),-g
 
 # finally we can build outside of the source directory
 #N_OBJDIR = $(BUILD_TMP)/$(FLAVOUR)
@@ -131,7 +131,7 @@ endif
 		DEP="$${DEP// /, }" && \
 		sed -i "s/@DEP@/$$DEP/" $(BUILD_TMP)/neutrino-control/control
 ifeq ($(PLATFORM), coolstream)
-	sed -i 's/^\(Depends:.*\)$$/\1, cs-drivers/' $(BUILD_TMP)/neutrino-control/control
+	sed -i 's/^\(Depends:.*\)$$/\1, cs-libs, cs-drivers, e2fsprogs, ffmpeg/' $(BUILD_TMP)/neutrino-control/control
 endif
 ifeq ($(PLATFORM), azbox)
 	sed -i 's/^\(Depends:.*\)$$/\1, azboxme-dvb-drivers, rmfp_player/' $(BUILD_TMP)/neutrino-control/control
