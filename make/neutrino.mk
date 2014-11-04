@@ -74,10 +74,13 @@ $(N_OBJDIR)/config.status: $(NEUTRINO_DEPS) $(MAKE_DIR)/neutrino.mk
 				INSTALL="`which install` -p"; \
 		test -e version.h || touch version.h
 
+BRANCH=`cd $(N_HD_SOURCE); git rev-parse --abbrev-ref HEAD`
+GITVERSION=`cd $(N_HD_SOURCE); git describe --always --tags --dirty --first-parent`
+
 
 ifneq ($(FLAVOUR), neutrino-mp)
 HOMEPAGE = "http://gitorious.org/neutrino-hd"
-IMGNAME  = "HD-Neutrino"
+IMGNAME  = "Neutrino-HD"
 else
 HOMEPAGE = "http://gitorious.org/neutrino-mp"
 IMGNAME  = "Neutrino-MP"
@@ -87,12 +90,7 @@ $(TARGETPREFIX)/.version:
 	echo "version=1200`date +%Y%m%d%H%M`"	 > $@
 	echo "creator=$(MAINTAINER)"		>> $@
 	echo "imagename=$(IMGNAME)"		>> $@
-	A=$(FLAVOUR); F=$${A#neutrino-??}; \
-		B=`cd $(N_HD_SOURCE); git describe --always --dirty`; \
-		C=$${B%-dirty}; D=$${B#$$C}; \
-		E=`cd $(N_HD_SOURCE); git tag --contains $$C`; \
-		test -n "$$E" && C="$$E"; \
-		echo "builddate=$$C$$D $${F:1}" >> $@
+	echo "builddate=$(GITVERSION) [$(BRANCH)]"	>> $@
 	echo "homepage=$(HOMEPAGE)"		>> $@
 ifeq ($(USE_STB_HAL), yes)
 	A=`cd $(LH_SRC); git describe --always --dirty`; \
@@ -140,7 +138,7 @@ endif
 	find $(PKGPREFIX)/share/tuxbox/neutrino/locale/ -type f \
 		! -name deutsch.locale ! -name english.locale | xargs --no-run-if-empty rm
 	# ignore the .version file for package  comparison, set package name, set package version
-	PKG_VER=`cat $(N_HD_SOURCE)/PACKAGE_VERSION_FILE` \
+	PKG_VER="$(GITVERSION)_$(BRANCH)" \
 		DONT_STRIP=$(NEUTRINO_NOSTRIP) CMP_IGNORE="/.version" \
 			PKG_ADDRESS=`cat $(N_HD_SOURCE)/PACKAGE_BUGREPORT_FILE` \
 				PKG_NAME=`cat $(N_HD_SOURCE)/PACKAGE_FILE` $(OPKG_SH) $(BUILD_TMP)/neutrino-control
