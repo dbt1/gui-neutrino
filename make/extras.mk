@@ -885,7 +885,6 @@ $(D)/xupnpd: $(D)/liblua $(ARCHIVE)/xupnpd_r$(XUPNP_SVN).tar.gz $(PLUGIN_DIR)/$(
 	mkdir -p $(PKGPREFIX)/usr/share
 	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/xupnpd $(PKGPREFIX)/bin
 	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/*.lua  $(PKGPREFIX)/share/xupnpd
-#	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/plugins/xupnpd_coolstream.lua $(PKGPREFIX)/share/xupnpd/plugins
 	cp -a $(PLUGIN_DIR)/$(LUA_REPO)/xupnpd/xupnpd_coolstream.lua $(PKGPREFIX)/share/xupnpd/plugins
 #	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/plugins/xupnpd_youtube.lua    $(PKGPREFIX)/share/xupnpd/plugins
 	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/ui/*  $(PKGPREFIX)/share/xupnpd/ui

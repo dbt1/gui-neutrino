@@ -834,7 +834,7 @@ $(PATCHES)/libdvbsi++-fix-unaligned-access-on-SuperH.patch
 	touch $@
 
 # no package, since the library is only built statically
-$(D)/lua: libncurses $(ARCHIVE)/lua-$(LUA_VER).tar.gz \
+$(D)/lua-static: libncurses $(ARCHIVE)/lua-$(LUA_VER).tar.gz \
 	$(ARCHIVE)/luaposix-$(LUAPOSIX_VER).tar.bz2 $(PATCHES)/lua-5.2.1-luaposix.patch
 	$(REMOVE)/lua-$(LUA_VER)
 	$(UNTAR)/lua-$(LUA_VER).tar.gz
@@ -851,6 +851,24 @@ $(D)/lua: libncurses $(ARCHIVE)/lua-$(LUA_VER).tar.gz \
 		$(MAKE) linux CC=$(TARGET)-gcc LDFLAGS="-L$(TARGETPREFIX)/lib" ; \
 		$(MAKE) install INSTALL_TOP=$(TARGETPREFIX)
 	rm -rf $(TARGETPREFIX)/.remove
+	$(REMOVE)/lua-$(LUA_VER)
+	touch $@
+
+$(D)/lua: $(D)/libncurses $(ARCHIVE)/lua-$(LUA_VER).tar.gz | $(TARGETPREFIX)
+	$(UNTAR)/lua-$(LUA_VER).tar.gz
+	set -e; cd $(BUILD_TMP)/lua-$(LUA_VER); \
+		$(PATCH)/lua-01-fix-coolstream-build.patch; \
+		$(PATCH)/lua-02-shared-libs-for-lua.patch; \
+		$(PATCH)/lua-03-lua-pc.patch; \
+		$(PATCH)/lua-04-lua-lvm.c.patch; \
+		$(MAKE) linux PKG_VERSION=$(LUA_VER) CC=$(TARGET)-gcc LD=$(TARGET)-ld AR="$(TARGET)-ar rcu" RANLIB=$(TARGET)-ranlib LDFLAGS="-L$(TARGETPREFIX)/lib"; \
+		sed -i 's/^V=.*/V= $(LUA_ABIVER)/' etc/lua.pc; \
+		sed 's/^R=.*/R= $(LUA_VER)/' etc/lua.pc > $(PKG_CONFIG_PATH)/lua.pc; \
+		$(MAKE) install INSTALL_TOP=$(TARGETPREFIX)
+	cp -a $(BUILD_TMP)/lua-$(LUA_VER)/src/liblua.so* $(TARGETPREFIX)/lib
+	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/lua.pc
+	rm -rf $(TARGETPREFIX)/bin/lua
+	rm -rf $(TARGETPREFIX)/bin/luac
 	$(REMOVE)/lua-$(LUA_VER)
 	touch $@
 
@@ -916,6 +934,50 @@ $(D)/libsigc++-$(LIBSIGCPP_VER): $(ARCHIVE)/libsigc++-$(LIBSIGCPP_VER).tar.xz | 
 	$(REMOVE)/libsigc++-$(LIBSIGCPP_VER)
 	rm -rf $(PKGPREFIX)
 	touch $@
+
+$(D)/liblua: $(D)/luaposix
+	mkdir -p $(PKGPREFIX)/lib/lua/$(LUA_ABIVER)
+	mkdir -p $(PKGPREFIX)/share/lua/$(LUA_ABIVER)
+	cp -a $(TARGETPREFIX)/lib/liblua.so* $(PKGPREFIX)/lib
+	cp -a $(TARGETPREFIX)/lib/lua/$(LUA_ABIVER)/posix_c.so $(PKGPREFIX)/lib/lua/$(LUA_ABIVER)
+	cp -a $(TARGETPREFIX)/share/lua/$(LUA_ABIVER)/posix.lua $(PKGPREFIX)/share/lua/$(LUA_ABIVER)
+	PKG_VER=$(LUA_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)/lib` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+		$(OPKG_SH) $(CONTROL_DIR)/liblua
+	rm -rf $(PKGPREFIX)
+	touch $@
+
+$(D)/luaposix: $(HOSTPREFIX)/bin/lua-$(LUA_VER) $(D)/lua $(ARCHIVE)/luaposix-v$(LUAPOSIX_VER).tar.gz $(ARCHIVE)/slingshot-v$(SLINGSHOT_VER).tar.gz | $(TARGETPREFIX)
+	$(UNTAR)/luaposix-v$(LUAPOSIX_VER).tar.gz
+	tar -C $(BUILD_TMP)/luaposix-$(LUAPOSIX_VER)/slingshot --strip=1 -xf $(ARCHIVE)/slingshot-v$(SLINGSHOT_VER).tar.gz
+	set -e; cd $(BUILD_TMP)/luaposix-$(LUAPOSIX_VER); \
+		$(PATCH)/luaposix-fix-build.patch; \
+		$(PATCH)/luaposix-fix-docdir-build.patch; \
+		export LUA=$(HOSTPREFIX)/bin/lua-$(LUA_VER); \
+		./bootstrap; \
+		autoreconf -fi; \
+		$(CONFIGURE) --prefix=$(TARGETPREFIX) \
+			--exec-prefix= \
+			--libdir=$(TARGETPREFIX)/lib/lua/$(LUA_ABIVER) \
+			--datarootdir=$(TARGETPREFIX)/share/lua/$(LUA_ABIVER) \
+			--mandir=$(TARGETPREFIX)/.remove \
+			--docdir=$(TARGETPREFIX)/.remove \
+			--enable-silent-rules \
+			--without-ncursesw; \
+		$(MAKE); \
+		$(MAKE) all check install
+	$(REMOVE)/luaposix-$(LUAPOSIX_VER) $(TARGETPREFIX)/.remove
+	touch $@
+
+# helper for luaposix build
+$(HOSTPREFIX)/bin/lua-$(LUA_VER): $(ARCHIVE)/lua-$(LUA_VER).tar.gz | $(TARGETPREFIX)
+	$(UNTAR)/lua-$(LUA_VER).tar.gz
+	set -e; cd $(BUILD_TMP)/lua-$(LUA_VER); \
+		$(PATCH)/lua-01-fix-coolstream-build.patch; \
+		$(MAKE) linux
+	install -m 0755 -D $(BUILD_TMP)/lua-$(LUA_VER)/src/lua $@
+	$(REMOVE)/lua-$(LUA_VER)
 
 
 #libbluray open-source library designed for Blu-Ray Discs playback for media players

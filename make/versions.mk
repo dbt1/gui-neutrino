@@ -90,10 +90,14 @@ LINUX_AZBOX_VER=3.9.2
 LIRC_VER=0.9.0
 
 # lua: easily embeddable scripting language
-LUA_VER=5.2.3
+LUA_ABIVER=5.2
+LUA_VER=$(LUA_ABIVER).3
 
 # luaposix: posix bindings for lua
 LUAPOSIX_VER=31
+
+# slingshot: needed by luaposix
+SLINGSHOT_VER=6
 
 # ncurses; software for controlling writing to the console screen
 NCURSES_VER=5.6
