@@ -1,0 +1,11 @@
+Package: libbluray
+Version: @VER@-1
+Description: library designed for Blu-Ray Discs playback for media players
+Section: libraries
+Priority: optional
+Maintainer: @MAINT@
+Architecture: @ARCH@
+Homepage: http://www.videolan.org/
+Source:
+Depends: @DEP@
+Provides: @PROV@

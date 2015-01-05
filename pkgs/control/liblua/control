@@ -1,0 +1,11 @@
+Package: liblua
+Version: @VER@-1
+Description: lua: an easily embeddable scripting language
+Section: base/libraries
+Priority: standard
+Maintainer: @MAINT@
+Architecture: @ARCH@
+Homepage: http://www.lua.org
+Source:
+Depends: @DEP@
+Provides: @PROV@
