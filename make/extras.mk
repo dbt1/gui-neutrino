@@ -867,13 +867,13 @@ $(D)/xmlto: $(ARCHIVE)/xmlto-$(XMLTO_VER).tar.gz | $(TARGETPREFIX)
 	rm -rf $(PKGPREFIX)
 	touch $@
 
-$(D)/xupnpd: $(ARCHIVE)/xupnpd_r$(XUPNP_SVN).tar.gz | $(TARGETPREFIX)
+$(D)/xupnpd: $(D)/liblua $(ARCHIVE)/xupnpd_r$(XUPNP_SVN).tar.gz $(PLUGIN_DIR)/$(LUA_REPO) | $(TARGETPREFIX)
 	$(REMOVE)/xupnpd_r$(XUPNP_SVN)
 	$(UNTAR)/xupnpd_r$(XUPNP_SVN).tar.gz
 	set -e; cd $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src; \
 		$(PATCH)/xupnpd-crossbuild.diff; \
 		$(PATCH)/xupnpd_cst.diff; \
-		make embedded PREFIX=$(TARGET)
+		make embedded PREFIX=$(TARGET) LUAFLAGS="-I$(TARGETPREFIX)/include -L$(TARGETLIB)"
 	rm -rf $(PKGPREFIX)
 	mkdir -p $(PKGPREFIX)/bin
 	mkdir -p $(PKGPREFIX)/share/xupnpd/playlists
@@ -884,7 +884,8 @@ $(D)/xupnpd: $(ARCHIVE)/xupnpd_r$(XUPNP_SVN).tar.gz | $(TARGETPREFIX)
 	mkdir -p $(PKGPREFIX)/usr/share
 	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/xupnpd $(PKGPREFIX)/bin
 	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/*.lua  $(PKGPREFIX)/share/xupnpd
-	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/plugins/xupnpd_coolstream.lua $(PKGPREFIX)/share/xupnpd/plugins
+#	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/plugins/xupnpd_coolstream.lua $(PKGPREFIX)/share/xupnpd/plugins
+	cp -a $(PLUGIN_DIR)/$(LUA_REPO)/xupnpd/xupnpd_coolstream.lua $(PKGPREFIX)/share/xupnpd/plugins
 #	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/plugins/xupnpd_youtube.lua    $(PKGPREFIX)/share/xupnpd/plugins
 	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/ui/*  $(PKGPREFIX)/share/xupnpd/ui
 	cp -a $(BUILD_TMP)/xupnpd_r$(XUPNP_SVN)/src/www/* $(PKGPREFIX)/share/xupnpd/www
@@ -892,7 +893,7 @@ $(D)/xupnpd: $(ARCHIVE)/xupnpd_r$(XUPNP_SVN).tar.gz | $(TARGETPREFIX)
 	install -m 0755 -D $(SCRIPTS)/xupnpd.init $(PKGPREFIX)/etc/init.d/xupnpd
 	ln -sf xupnpd $(PKGPREFIX)/etc/init.d/S80xupnpd
 	ln -sf xupnpd $(PKGPREFIX)/etc/init.d/K20xupnpd
-	PKG_VER=svnr$(XUPNP_SVN) $(OPKG_SH) $(CONTROL_DIR)/xupnpd
+	PKG_VER=svnr$(XUPNP_SVN) PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)/bin` $(OPKG_SH) $(CONTROL_DIR)/xupnpd
 	$(REMOVE)/xupnpd_r$(XUPNP_SVN)
 	rm -rf $(PKGPREFIX)
 	touch $@

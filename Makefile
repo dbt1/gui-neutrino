@@ -121,10 +121,10 @@ include make/neutrino.mk
 include make/cleantargets.mk
 include make/linuxkernel.mk
 include make/archives.mk
-include make/extras.mk
 include make/gstreamer.mk
 include make/packages.mk
 include make/plugins.mk
+include make/extras.mk
 include make/example.mk
 include make/flashimage.mk
 include make/crosstool-$(BOXARCH).mk

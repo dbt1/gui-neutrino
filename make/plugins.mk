@@ -1,5 +1,9 @@
 # plugins...
 # experimental, don't use yet until you know what you are doing
+PLUGIN_DIR   ?= $(SOURCE_DIR)/neutrino-hd-plugins
+LUA_REPO     ?= cst-public-plugins-scripts-lua
+
+
 $(PLUGIN_DIR)/configure.ac: | $(PLUGIN_DIR)
 $(PLUGIN_DIR)/configure: $(PLUGIN_DIR)/configure.ac
 	cd $(PLUGIN_DIR) && ./autogen.sh
@@ -23,5 +27,10 @@ plugins: $(PLUGIN_DIR)/configure $(BUILD_TMP)/neutrino-hd-plugins
 		cp -a $(PKGPREFIX)/* $(TARGETPREFIX)/; \
 		$(OPKG_SH) $(CONTROL_DIR)/plugins/$$i; \
 	done
+
+
+$(PLUGIN_DIR)/$(LUA_REPO):
+	mkdir -p $(shell dirname $@)
+	cd $(shell dirname $@) && git clone git://coolstreamtech.de/cst-public-plugins-scripts-lua.git $(LUA_REPO)
 
 PHONY += plugins
