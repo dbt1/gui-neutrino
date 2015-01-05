@@ -46,7 +46,7 @@ UTIL_LINUX_NG_VER=2.18
 CURL_VER=7.28.0
 
 # libpng; reference library for reading and writing PNGs
-PNG_VER=1.6.6
+PNG_VER=1.6.15
 
 # freetype; free, high-quality and portable Font engine
 FREETYPE_VER=2.5.0.1
@@ -227,7 +227,7 @@ LIBXML2_VER=2.9.1
 DROPBEAR-VER=0.53.1
 
 # opkg; a lightweight package management system based on Ipkg
-OPKG_VER=0.2.2
+OPKG_VER=0.2.4
 
 ## for recent versions, the SVN trunk rev is used:
 #OPKG_SVN=635
