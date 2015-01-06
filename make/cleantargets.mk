@@ -17,4 +17,4 @@ all-clean: rebuild-clean
 	-rm -rf $(CROSS_BASE)
 
 
-PHONY += clean rebuild-clean all-clean
+PHONY += clean all-deps-clean rebuild-clean all-clean
