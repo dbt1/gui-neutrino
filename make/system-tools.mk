@@ -44,9 +44,9 @@ $(D)/procps: $(D)/libncurses $(ARCHIVE)/procps-$(PROCPS-VER).tar.gz | $(TARGETPR
 		$(PATCH)/procps-3.2.8-avoid-ICE-with-gcc-4.3.2-arm.diff; \
 		$(PATCH)/procps-3.2.8-fix-unknown-HZ-compatible.diff; \
 		make CC=$(TARGET)-gcc LDFLAGS="$(LD_FLAGS)" \
-			CPPFLAGS="-pipe -O2 -g -I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include/ncurses -D__GNU_LIBRARY__" proc/libproc-$(PROCPS-VER).so; \
+			CPPFLAGS="-pipe -$(TARGET_CFOPTFLAG) -g -I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include/ncurses -D__GNU_LIBRARY__" proc/libproc-$(PROCPS-VER).so; \
 		make CC=$(TARGET)-gcc LDFLAGS="$(LD_FLAGS) proc/libproc-$(PROCPS-VER).so" \
-			CPPFLAGS="-pipe -O2 -g -I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include/ncurses -D__GNU_LIBRARY__" top ps/ps; \
+			CPPFLAGS="-pipe -$(TARGET_CFOPTFLAG) -g -I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include/ncurses -D__GNU_LIBRARY__" top ps/ps; \
 		mkdir -p $(TARGETPREFIX)/bin; \
 		rm -f $(TARGETPREFIX)/bin/ps $(TARGETPREFIX)/bin/top; \
 		install -m 755 top ps/ps $(TARGETPREFIX)/bin; \
@@ -183,7 +183,7 @@ $(D)/xfsprogs: $(ARCHIVE)/xfsprogs-$(XFSPROGS-VER).tar.gz | $(TARGETPREFIX) $(TA
 $(D)/ntfs-3g: $(ARCHIVE)/ntfs-3g_ntfsprogs-$(NTFS_3G_VER).tgz | $(TARGETPREFIX)
 	$(UNTAR)/ntfs-3g_ntfsprogs-$(NTFS_3G_VER).tgz
 	set -e; cd $(BUILD_TMP)/ntfs-3g_ntfsprogs-$(NTFS_3G_VER); \
-		CFLAGS="-pipe -O2 -g" ./configure \
+		CFLAGS="-pipe -$(TARGET_CFOPTFLAG) -g" ./configure \
 			--build=$(BUILD) \
 			--host=$(TARGET) \
 			--prefix= \

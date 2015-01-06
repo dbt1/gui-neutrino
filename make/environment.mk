@@ -96,7 +96,8 @@ endif
 BUILD       ?= $(shell /usr/share/libtool/config.guess 2>/dev/null || /usr/share/libtool/config/config.guess)
 
 TARGETLIB       = $(TARGETPREFIX)/lib
-TARGET_CFLAGS   = -pipe -O2 -g -I$(TARGETPREFIX)/include
+TARGET_CFOPTFLAG= -Os
+TARGET_CFLAGS   = -pipe $(TARGET_CFOPTFLAG) -g -I$(TARGETPREFIX)/include
 TARGET_CPPFLAGS = $(TARGET_CFLAGS)
 TARGET_CXXFLAGS = $(TARGET_CFLAGS)
 TARGET_LDFLAGS  = -Wl,-O1 -L$(TARGETLIB)
