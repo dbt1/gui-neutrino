@@ -2,11 +2,11 @@
 clean:
 	make neutrino-clean
 
-deps-clean:
+all-deps-clean:
 	rm -fv $(DEPDIR)/*
 
 # rebuild all except the toolchain
-rebuild-clean: clean deps-clean
+rebuild-clean: clean all-deps-clean
 	-rm -rf $(TARGETPREFIX)
 	-rm -rf $(HOSTPREFIX)
 	-set -e;cd $(BUILD_TMP); \
