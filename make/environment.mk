@@ -48,7 +48,7 @@ BOXARCH     ?= arm
 ifeq ($(CSKVERSION),)
 CSKVERSION	= 2.6.34.13
 endif
-CSKVERSION_FULL = $(CSKVERSION)-nevis
+CSKVERSION_FULL = $(CSKVERSION)
 endif
 
 ifneq ($(GIT_PROTOCOL), http)
