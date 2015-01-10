@@ -52,7 +52,7 @@ PNG_VER=1.6.15
 FREETYPE_VER=2.5.0.1
 
 # libjpeg-turbo; a derivative of libjpeg for x86 and x86-64 processors which uses SIMD instructions (MMX, SSE2, etc.) to accelerate baseline JPEG compression and decompression
-JPEG_TURBO_VER=1.2.1
+JPEG_TURBO_VER=1.4.0
 
 # boost; portable C++ source library
 BOOST_MAJOR=1
