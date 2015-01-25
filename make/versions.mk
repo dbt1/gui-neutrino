@@ -283,7 +283,7 @@ GDB_VER=7.3
 MTD_UTILS_VER = 1.4.9
 
 # wget for retrieving files using HTTP, HTTPS and FTP
-WGET_VER=1.14
+WGET_VER=1.16
 
 #xmlto, shell-script tool for converting XML files to various formats.
 XMLTO_VER=0.0.25
