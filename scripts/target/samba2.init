@@ -1,8 +1,15 @@
 #!/bin/sh
 
+BINPATH=/opt/pkg/bin
+SAMBA=$BINPATH/smbd
+NMBD=$BINPATH/nmbd
+
+STARTLIST="$SAMBA $NMBD"
+STOPLIST="$NMBD $SAMBA"
+
 case "$1" in
 	start)
-		for i in smbd nmbd; do
+		for i in $STARTLIST; do
 			printf "starting $i ..."
 			if pidof $i > /dev/null; then
 				echo " already running"
@@ -13,7 +20,7 @@ case "$1" in
 		done
 		;;
 	stop)
-		for i in nmbd smbd; do
+		for i in $STOPLIST; do
 			printf "stopping $i ..."
 			if pidof $i > /dev/null; then
 				read pid < /var/run/${i}.pid
