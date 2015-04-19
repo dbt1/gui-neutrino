@@ -5,6 +5,12 @@ clean:
 all-deps-clean:
 	rm -fv $(DEPDIR)/*
 
+pkgs-semi-clean: 
+	-rm -rf $(PACKAGE_DIR)/.cache  $(PACKAGE_DIR)/.old  rm $(PACKAGE_DIR)/Packages
+
+install-clean: pkgs-semi-clean
+	-rm -rf $(BUILD_TMP)/install
+
 # rebuild all except the toolchain
 rebuild-clean: clean all-deps-clean
 	-rm -rf $(TARGETPREFIX)
