@@ -18,6 +18,7 @@
 # * non mandatory parameters
 # PACKAGE_DIR	- directory to copy the built package to. If the same package
 #		  version is already present there, compare and skip copying if equal
+# LOCAL_PACKAGE_DIR	- same like PACKAGE_DIR but user defined
 # DONT_STRIP	- if this is not empty, don't strip files
 # CMP_IGNORE	- list of files to ignore for package compare (full path)
 # PKG_VER	- package Version. @VER@ in the control file is replaced by this.
@@ -33,6 +34,7 @@
 set -e
 ME=${0##*/}
 
+PKG_DIR=
 CONTROL_DIR="$1"
 
 test -n "$STRIP"
@@ -43,6 +45,19 @@ if test -z "$MAINTAINER"; then
 	echo "MAINTAINER must not be empty!" >&2
 	exit 42
 fi
+
+#check for local defined pkg directory
+if test -z $LOCAL_PACKAGE_DIR ; then
+	PKG_DIR=$PACKAGE_DIR
+else
+	PKG_DIR=$LOCAL_PACKAGE_DIR
+fi
+
+#create pkg directory if not exists
+if [ ! -d $PKG_DIR ]; then
+	mkdir -pv $PKG_DIR
+fi
+
 
 # force GNU format as opkg cannot handle newer pax/posix format which is
 # default in e.g. openSUSE 12.2
@@ -56,14 +71,14 @@ TAR="tar -H gnu"
 # translate "return" with "echo'ed to stdout".
 check_oldpackage() {
 	local R r FILE # revision
-	# for backwards compatibility, just succeed if PACKAGE_DIR is not set
-	if test -z "$PACKAGE_DIR"; then
+	# for backwards compatibility, just succeed if PKG_DIR is not set
+	if test -z "$PKG_DIR"; then
 		echo 0
 		return
 	fi
 
 	# check if the package already exists...
-	TEST=$(ls ${PACKAGE_DIR}/${NAME}-${VERS}-*.opk 2>/dev/null)
+	TEST=$(ls ${PKG_DIR}/${NAME}-${VERS}-*.opk 2>/dev/null)
 	if test -z "$TEST"; then
 		echo "${ME}: package does not exist yet" >&2
 		echo "-1"
@@ -77,13 +92,13 @@ check_oldpackage() {
 	# crappy version-sort routine, in case more than one old package is present...
 	r=-1; FILE=""
 	for i in $TEST; do
-		R=${i#${PACKAGE_DIR}/${NAME}-${VERS}-} # strip $NAME-$VERS-
+		R=${i#${PKG_DIR}/${NAME}-${VERS}-} # strip $NAME-$VERS-
 		R=${R%.opk}
 		[ $R -lt $r ] && continue
 		r=$R; FILE=$i
 	done
 	test -z "$FILE" && { echo "check_oldpackage: \$FILE is empty" >&2; exit 1; } # assert
-	echo "${ME}: package ${FILE#${PACKAGE_DIR}/} already exists, comparing..." >&2
+	echo "${ME}: package ${FILE#${PKG_DIR}/} already exists, comparing..." >&2
 	mkdir oldroot oldCONTROL
 	ar p $FILE control.tar.gz | tar -xzf - -C oldCONTROL
 	ar p $FILE data.tar.gz    | tar -xzf - -C oldroot
@@ -239,7 +254,7 @@ fi
 VERS=${VERSION%-*}  # strip off build revision
 BREV=${VERSION##*-} # strip off package version
 
-CACHEDIR=${PACKAGE_DIR}/.cache
+CACHEDIR=${PKG_DIR}/.cache
 CACHEFILE=${CACHEDIR}/${NAME}-${VERS}
 # the version from the control file is overridden by the cached value
 if test -e $CACHEFILE; then
@@ -299,14 +314,14 @@ ${TAR} -cvzf control.tar.gz --owner=0 --group=0 -C CONTROL .
 PKG=${NAME}-${VERSION}.opk
 ar -r ${SOURCE}/${PKG} ./debian-binary ./data.tar.gz ./control.tar.gz
 
-for i in $(ls ${PACKAGE_DIR}/${NAME}-${VERS}-*.opk 2>/dev/null); do
-	test -d ${PACKAGE_DIR}/.old || mkdir ${PACKAGE_DIR}/.old
-	echo "moving old package $i to ${PACKAGE_DIR}/.old"
-	mv -v $i ${PACKAGE_DIR}/.old
+for i in $(ls ${PKG_DIR}/${NAME}-${VERS}-*.opk 2>/dev/null); do
+	test -d ${PKG_DIR}/.old || mkdir ${PKG_DIR}/.old
+	echo "moving old package $i to ${PKG_DIR}/.old"
+	mv -v $i ${PKG_DIR}/.old
 done
 
 cd $SOURCE
-mv -v $PKG $PACKAGE_DIR
+mv -v $PKG $PKG_DIR
 #
 # update cache dir...
 test -d $CACHEDIR || mkdir $CACHEDIR

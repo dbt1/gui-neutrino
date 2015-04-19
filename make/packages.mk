@@ -42,54 +42,55 @@ glibc-pkg: $(TARGETPREFIX)/sbin/ldconfig
 	rm -rf $(PKGPREFIX) $(BUILD_TMP)/glibc-control
 
 ifeq ($(PLATFORM), coolstream)
-cs-drivers-pkg:
-	# we have two directories packed, the newer one determines the package version
-	rm -rf $(BUILD_TMP)/tmp-ctrl
-	cp -a $(CONTROL_DIR)/cs-drivers $(BUILD_TMP)/tmp-ctrl
-	rm -rf $(PKGPREFIX)
-	mkdir -p $(PKGPREFIX)/lib/modules/$(UNCOOL_KVER_FULL)
-	mkdir    $(PKGPREFIX)/lib/firmware
-ifneq ($(UNCOOL_SOURCE), git)
-	opkg-controlver-from-svn.sh $(BUILD_TMP)/tmp-ctrl/control \
-		$(SOURCE_DIR)/svn/COOLSTREAM/2.6.26.8-nevis $(SOURCE_DIR)/svn/THIRDPARTY/lib/firmware
-	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SOURCE_DIR)/svn/COOLSTREAM/2.6.26.8-nevis || \
-	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SOURCE_DIR)/svn/THIRDPARTY/lib/firmware
-	cp -a $(SOURCE_DIR)/svn/COOLSTREAM/2.6.26.8-nevis/* $(PKGPREFIX)/lib/modules/2.6.26.8-nevis
-	cp -a $(SOURCE_DIR)/svn/THIRDPARTY/lib/firmware/*   $(PKGPREFIX)/lib/firmware
-else
-	set -e; cd $(UNCOOL_DRVBASE); \
-		sed -i 's/^Package:.*$$/Package: cs-drivers_$(subst .,_,$(UNCOOL_KVER))/' \
-			$(BUILD_TMP)/tmp-ctrl/control; \
-		opkg-gitdescribe.sh $(BUILD_TMP)/tmp-ctrl/control . drivers/$(UNCOOL_KVER_FULL) firmware; \
-		cp -a drivers/$(UNCOOL_KVER_FULL) $(PKGPREFIX)/lib/modules/$(UNCOOL_KVER_FULL)/extra; \
-		cp -a firmware/*                  $(PKGPREFIX)/lib/firmware
-	rm $(PKGPREFIX)/lib/modules/$(UNCOOL_KVER_FULL)/extra/cifs.ko # we build our own...
-endif
-	mkdir -p $(PKGPREFIX)/etc/init.d
-	cp -a skel-root/$(PLATFORM)/etc/init.d/*loadmodules $(PKGPREFIX)/etc/init.d
-	DONT_STRIP=1 $(OPKG_SH) $(BUILD_TMP)/tmp-ctrl
-	rm -rf $(PKGPREFIX) $(BUILD_TMP)/tmp-ctrl
+cs-drivers-pkg: cs-drivers-$(UNCOOL_FLAVOUR)
+#	# we have two directories packed, the newer one determines the package version
+#	rm -rf $(BUILD_TMP)/tmp-ctrl
+#	cp -a $(CONTROL_DIR)/cs-drivers $(BUILD_TMP)/tmp-ctrl
+#	rm -rf $(PKGPREFIX)
+#	mkdir -p $(PKGPREFIX)/lib/modules/$(UNCOOL_KVER_FULL)
+#	mkdir    $(PKGPREFIX)/lib/firmware
+#ifneq ($(UNCOOL_SOURCE), git)
+#	opkg-controlver-from-svn.sh $(BUILD_TMP)/tmp-ctrl/control \
+#		$(SOURCE_DIR)/svn/COOLSTREAM/2.6.26.8-nevis $(SOURCE_DIR)/svn/THIRDPARTY/lib/firmware
+#	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SOURCE_DIR)/svn/COOLSTREAM/2.6.26.8-nevis || \
+#	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SOURCE_DIR)/svn/THIRDPARTY/lib/firmware
+#	cp -a $(SOURCE_DIR)/svn/COOLSTREAM/2.6.26.8-nevis/* $(PKGPREFIX)/lib/modules/2.6.26.8-nevis
+#	cp -a $(SOURCE_DIR)/svn/THIRDPARTY/lib/firmware/*   $(PKGPREFIX)/lib/firmware
+#else
+#	set -e; cd $(UNCOOL_DRVBASE); \
+#		sed -i 's/^Package:.*$$/Package: cs-drivers_$(subst .,_,$(UNCOOL_KVER))/' \
+#			$(BUILD_TMP)/tmp-ctrl/control; \
+#		opkg-gitdescribe.sh $(BUILD_TMP)/tmp-ctrl/control . drivers/$(UNCOOL_KVER_FULL) firmware; \
+#		cp -a drivers/$(UNCOOL_KVER_FULL) $(PKGPREFIX)/lib/modules/$(UNCOOL_KVER_FULL)/extra; \
+#		cp -a firmware/*                  $(PKGPREFIX)/lib/firmware
+#	rm $(PKGPREFIX)/lib/modules/$(UNCOOL_KVER_FULL)/extra/cifs.ko # we build our own...
+#endif
+#	mkdir -p $(PKGPREFIX)/etc/init.d
+#	cp -a skel-root/$(PLATFORM)/etc/init.d/*loadmodules $(PKGPREFIX)/etc/init.d
+#	DONT_STRIP=1 $(OPKG_SH) $(BUILD_TMP)/tmp-ctrl
+#	rm -rf $(PKGPREFIX) $(BUILD_TMP)/tmp-ctrl
 
-cs-libs-pkg: $(UNCOOL_LIBS)
-	rm -rf $(BUILD_TMP)/tmp-ctrl
-	cp -a $(CONTROL_DIR)/cs-libs $(BUILD_TMP)/tmp-ctrl
-ifneq ($(UNCOOL_SOURCE), git)
-	opkg-controlver-from-svn.sh $(BUILD_TMP)/tmp-ctrl/control \
-		$(SVN_TP_LIBS)/libnxp/libnxp.so \
-		$(SVN_TP_LIBS)/libcs/libcoolstream.so \
-		$(SVN_TP_LIBS)/libcs/libcoolstream-mt.so
-	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SVN_TP_LIBS)/libnxp/libnxp.so || \
-	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SVN_TP_LIBS)/libcs/libcoolstream.so || \
-	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SVN_TP_LIBS)/libcs/libcoolstream-mt.so
-else
-	opkg-gitdescribe.sh $(BUILD_TMP)/tmp-ctrl/control $(UNCOOL_DRVBASE)/libs
-endif
-	rm -rf $(PKGPREFIX)
-	mkdir -p $(PKGPREFIX)/lib
-	cp -a $(UNCOOL_LIBS) $(PKGPREFIX)/lib
-	PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
-		$(OPKG_SH) $(BUILD_TMP)/tmp-ctrl
-	rm -rf $(PKGPREFIX) $(BUILD_TMP)/tmp-ctrl
+cs-libs-pkg: cs-libs-$(UNCOOL_FLAVOUR)
+#cs-libs-pkg: $(UNCOOL_LIBS)
+#	rm -rf $(BUILD_TMP)/tmp-ctrl
+#	cp -a $(CONTROL_DIR)/cs-libs $(BUILD_TMP)/tmp-ctrl
+#ifneq ($(UNCOOL_SOURCE), git)
+#	opkg-controlver-from-svn.sh $(BUILD_TMP)/tmp-ctrl/control \
+#		$(SVN_TP_LIBS)/libnxp/libnxp.so \
+#		$(SVN_TP_LIBS)/libcs/libcoolstream.so \
+#		$(SVN_TP_LIBS)/libcs/libcoolstream-mt.so
+#	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SVN_TP_LIBS)/libnxp/libnxp.so || \
+#	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SVN_TP_LIBS)/libcs/libcoolstream.so || \
+#	opkg-chksvn.sh $(BUILD_TMP)/tmp-ctrl $(SVN_TP_LIBS)/libcs/libcoolstream-mt.so
+#else
+#	opkg-gitdescribe.sh $(BUILD_TMP)/tmp-ctrl/control $(UNCOOL_DRVBASE)/libs
+#endif
+#	rm -rf $(PKGPREFIX)
+#	mkdir -p $(PKGPREFIX)/lib
+#	cp -a $(UNCOOL_LIBS) $(PKGPREFIX)/lib
+#	PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+#		$(OPKG_SH) $(BUILD_TMP)/tmp-ctrl
+#	rm -rf $(PKGPREFIX) $(BUILD_TMP)/tmp-ctrl
 
 usb-driver-pkg: cskernel
 	rm -rf $(PKGPREFIX)
@@ -274,11 +275,13 @@ install-pkgs: prepare-pkginstall
 
 # install-pkgs remove everything...
 remove-pkgs:
-	mkdir -p $(BUILD_TMP)/install/usr/lib/opkg
-	for i in `ls $(PACKAGE_DIR)`; do \
-		echo opkg-cl -f $(BUILD_TMP)/opkg.conf -o $(BUILD_TMP)/install remove $(PACKAGE_DIR)/$$i ; \
+	rm -rfv $(BASE_DIR)/$(BASE_DIR)/pkgs/opkg/.cache/* $(BASE_DIR)/$(BASE_DIR)/pkgs/opkg/.old/*
+	rm -fv $(BASE_DIR)/$(BASE_DIR)/pkgs/opkg/*.opk
+	#mkdir -p $(BUILD_TMP)/install/usr/lib/opkg
+	#for i in `ls $(PACKAGE_DIR)`; do \
+		#echo opkg-cl -f $(BUILD_TMP)/opkg.conf -o $(BUILD_TMP)/install remove $(PACKAGE_DIR)/$$i ; \
 		#opkg-cl -f $(PATCHES)/opkg.conf -o $(BUILD_TMP)/install remove $(PACKAGE_DIR)/$$i ; \
-	done;
+	#done;
 	
 
 # minimal-system-pkgs allows booting, not much else
@@ -346,7 +349,7 @@ ifeq ($(PKG_DEST_DIR),)
 	@false
 else
 	mkdir -pv $(PKG_DEST_DIR)
-	rsync -avP --exclude=.cache --exclude=.old --exclude=.gitignore --delete \
+	rsync -avPr --exclude=.cache --exclude=.old --exclude=.gitignore --delete \
 		$(PACKAGE_DIR)/. $(PKG_DEST_DIR)/.
 endif
 

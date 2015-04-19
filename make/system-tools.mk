@@ -44,9 +44,9 @@ $(D)/procps: $(D)/libncurses $(ARCHIVE)/procps-$(PROCPS-VER).tar.gz | $(TARGETPR
 		$(PATCH)/procps-3.2.8-avoid-ICE-with-gcc-4.3.2-arm.diff; \
 		$(PATCH)/procps-3.2.8-fix-unknown-HZ-compatible.diff; \
 		make CC=$(TARGET)-gcc LDFLAGS="$(LD_FLAGS)" \
-			CPPFLAGS="-pipe -$(TARGET_CFOPTFLAG) -g -I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include/ncurses -D__GNU_LIBRARY__" proc/libproc-$(PROCPS-VER).so; \
+			CPPFLAGS="-pipe $(TARGET_CFOPTFLAG) -g -I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include/ncurses -D__GNU_LIBRARY__" proc/libproc-$(PROCPS-VER).so; \
 		make CC=$(TARGET)-gcc LDFLAGS="$(LD_FLAGS) proc/libproc-$(PROCPS-VER).so" \
-			CPPFLAGS="-pipe -$(TARGET_CFOPTFLAG) -g -I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include/ncurses -D__GNU_LIBRARY__" top ps/ps; \
+			CPPFLAGS="-pipe $(TARGET_CFOPTFLAG) -g -I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include/ncurses -D__GNU_LIBRARY__" top ps/ps; \
 		mkdir -p $(TARGETPREFIX)/bin; \
 		rm -f $(TARGETPREFIX)/bin/ps $(TARGETPREFIX)/bin/top; \
 		install -m 755 top ps/ps $(TARGETPREFIX)/bin; \
@@ -73,8 +73,8 @@ $(D)/busybox-$(BUSYBOX_VER): $(ARCHIVE)/busybox-$(BUSYBOX_VER).tar.bz2 | $(TARGE
 			$(PATCH)/busybox-1.21.1-reorder-scanning.diff; \
 			} || true; \
 		test -e $(PATCHES)/busybox-$(BUSYBOX_REL).config.$(PLATFORM) && \
-			cp $(PATCHES)/busybox-$(BUSYBOX_REL).config.$(PLATFORM) .config || \
-			cp $(PATCHES)/busybox-$(BUSYBOX_REL).config .config; \
+			cp $(PATCHES)/busybox-$(BUSYBOX_REL).config.$(PLATFORM).no_wget .config || \
+			cp $(PATCHES)/busybox-$(BUSYBOX_REL).config.no_wget .config; \
 		sed -i -e 's#^CONFIG_PREFIX.*#CONFIG_PREFIX="$(PKGPREFIX)"#' .config; \
 		grep -q DBB_BT=AUTOCONF_TIMESTAMP Makefile.flags && \
 		sed -i 's#AUTOCONF_TIMESTAMP#"\\"$(PLATFORM)\\""#' Makefile.flags || true; \

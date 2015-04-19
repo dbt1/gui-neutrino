@@ -152,8 +152,8 @@ PKGCONFIG_VER=0.26
 PROCPS-VER=3.2.8
 
 # busybox; combines tiny versions of many common UNIX utilities into a single binary
-BUSYBOX_REL = 1.21
-BUSYBOX_PATCH = 1
+BUSYBOX_REL = 1.19
+BUSYBOX_PATCH = 4
 BUSYBOX_VER = $(BUSYBOX_REL).$(BUSYBOX_PATCH)
 
 # e2fsprogs; filesystem utilities for use with the ext[x] filesystem

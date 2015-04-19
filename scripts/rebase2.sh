@@ -51,7 +51,7 @@ for f in  $BRANCHES ; do
 			if [[ "$2" == "dryrun" ]]; then
 				echo -e "rebase [$1] => [$f]"
 			else
-				git rebase $1
+				git rebase -v $1
 			fi;
 			echo -e "ready\n"
 		fi;
