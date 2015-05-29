@@ -1,4 +1,5 @@
 #!/bin/sh
-touch /tmp/.reboot
+wget -O /tmp/postinst.log -q 127.0.0.1/control/message?popup=Install%20of%20Neutrino%20is%20finished,%20please%20restart!
+
 
 
