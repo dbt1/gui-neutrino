@@ -3,7 +3,7 @@ Version: @VER@-1
 Description: Drivers and Firmware for Coolstream HD1 Hardware
 Section: base/drivers
 Priority: required
-Maintainer: @MAINT@
+Maintainer: CoolStream International Ltd
 Architecture: @ARCH@
 Homepage: http://coolstreamtech.com/
 Source:
