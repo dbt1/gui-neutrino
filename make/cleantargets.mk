@@ -8,6 +8,9 @@ all-deps-clean:
 pkgs-semi-clean: 
 	-rm -rf $(PACKAGE_DIR)/.cache  $(PACKAGE_DIR)/.old  rm $(PACKAGE_DIR)/Packages
 
+pkgs-clean: pkgs-semi-clean
+	-rm -f $(PACKAGE_DIR)/*.opk
+
 install-clean: pkgs-semi-clean
 	-rm -rf $(BUILD_TMP)/install
 
