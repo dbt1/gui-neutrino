@@ -1,0 +1,28 @@
+#!/bin/sh
+#
+# init fe device.
+#
+
+echo "[$0]...... try to init frontend divice(s)..."
+echo -e "\033[1m\033[33m[$0]...... $1 $2\033[0m"
+$1 $2
+sleep 5
+
+DEVICE_NAME="/dev/dvb/adapter0/frontend"
+
+LOOPS="0 1 2 3"
+
+for I in  $LOOPS ; do
+	echo "[$0]....... searching device $DEVICE_NAME$I..."
+	if [ -f $I ]; then
+        	echo "[$0]...... found $DEVICE_NAME$I"
+		exit 0
+	fi
+done
+
+echo "[$0]...... no frontend device(s) found, retry..."
+sleep 10
+echo -e "\033[1m\033[33m[$0]...... $1 $2\033[0m"
+$1 $2
+exit 0
+

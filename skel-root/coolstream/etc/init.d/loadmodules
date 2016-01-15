@@ -1,5 +1,8 @@
 #!/bin/sh
 
+INSMOD="/sbin/insmod"
+MODPROBE="/sbin/modprobe"
+
 im()
 {
 	modname=$1
@@ -10,9 +13,13 @@ im()
 	# the CS modules are in /lib/modules/$KVER/*,
 	# own built modules are in /lib/modules/$KVER/kernel/... subdirectories
 	if test -e $file; then
-		/sbin/insmod $file ${params:-$@}
+		echo "[$0]....... $INSMOD $file ${params:-$@}" 
+		$INSMOD $file ${params:-$@}
+		IM=$INSMOD
 	else
-		/sbin/modprobe $modname $@
+		echo "[$0]...... $MODPROBE $modname $@"
+		$MODPROBE $modname -v $@
+		IM=$MODPROBE
 	fi
 }
 
@@ -31,10 +38,12 @@ start)
 		s/^\(\S\+\)-/\1_/g;
 		p }" /etc/modprobe.conf)
 	im cs_frontpanel
-	/bin/dt -ls01
-	/bin/dt -ls02
-	/bin/dt -c
-	/bin/dt -t"init drivers..."
+	if test -e /bin/dt; then
+		/bin/dt -ls01
+		/bin/dt -ls02
+		/bin/dt -c
+		/bin/dt -t"init system..."
+	fi
 	im cnxt_kal
 	im cnxt_base init=$($NEWKERNEL && echo 1 || echo 0)
 	im cnxt_fb cnxtfb_standalone=1 cnxtfb_width=1280 cnxtfb_height=720
@@ -43,6 +52,11 @@ start)
 	im cs_control hdd_power=1
 	im cnxt_i2c
 	im cnxt_sata_drv
+
+	im cifs
+	im usbserial
+	im ftdi_sio
+
 	im stv6110 verbose=0
 	im stv090x verbose=0
 	im tda10023
@@ -50,10 +64,12 @@ start)
 	im max2112
 	im cs_frontend_prop
 	im dvb-core
-	im cs_frontend
+	/etc/init.d/load-fe-device $IM cs_frontend
+	#im cs_frontend
 	im md4
-	im cifs
-	im usbserial
-	im ftdi_sio
+
 	;;
 esac
+
+
+
