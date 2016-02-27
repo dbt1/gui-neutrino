@@ -61,8 +61,8 @@ BOOST_MICRO=0
 BOOST_VER=$(BOOST_MAJOR)_$(BOOST_MINOR)_$(BOOST_MICRO)
 
 # openssl; toolkit for the SSL v2/v3 and TLS v1 protocol
-OPENSSL_VER=0.9.8
-OPENSSL_SUBVER=q
+OPENSSL_VER=1.0.1
+OPENSSL_SUBVER=
 
 # libffmpeg; complete, cross-platform solution to record, convert and stream audio and video
 # get revision direct from source tree
@@ -290,7 +290,7 @@ XMLTO_VER=0.0.25
 
 #libsigc++: typesafe Callback Framework for C++
 LIBSIGCPP_MAJOR=2
-LIBSIGCPP_MINOR=3
+LIBSIGCPP_MINOR=4
 LIBSIGCPP_MICRO=1
 LIBSIGCPP_VER=$(LIBSIGCPP_MAJOR).$(LIBSIGCPP_MINOR).$(LIBSIGCPP_MICRO)
 
@@ -303,3 +303,12 @@ LIBXLST_VER=1.1.28
 #libbluray open-source library designed for Blu-Ray Discs playback for media players
 LIBBLURAY_VER=0.5.0
 
+#nfsd utils stuff
+LIBTIRPC_VER  = 0.2.4
+RPCBIND_VER   = 0.2.1
+NFS_UTILS_VER = 1.2.6
+
+
+PUGIXML_VER = 1.6
+
+LIBRTMP_VER = 2.3

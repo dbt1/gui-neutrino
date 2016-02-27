@@ -1,0 +1,11 @@
+Package: libpugixml
+Version: @VER@-1
+Description: A light-weight C++ XML processing library
+Section: extras/libraries
+Priority: optional
+Maintainer: @MAINT@
+Architecture: @ARCH@
+Homepage: http://pugixml.org/
+Source:
+Depends: @DEP@
+Provides: @PROV@

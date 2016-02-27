@@ -128,6 +128,7 @@ include make/extras.mk
 include make/example.mk
 include make/flashimage.mk
 include make/crosstool-$(BOXARCH).mk
+include make/nfsd.mk
 
 update-self:
 	git pull

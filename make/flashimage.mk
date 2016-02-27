@@ -15,7 +15,7 @@ local-install:
 	# copy local/flash/* into the image...
 	# you can e.g. create local/flash/boot/audio.elf ...
 	if test -d $(BASE_DIR)/local/flash/; then \
-		rsync -avP --exclude=*.*~ $(BASE_DIR)/local/flash/. $(BUILD_TMP)/install; \
+		rsync -avP --exclude=*.*~ --exclude=.directory --exclude=.remove $(BASE_DIR)/local/flash/. $(BUILD_TMP)/install; \
 	fi
 ifeq ($(PLATFORM), spark)
 ifeq ($(SPARK_ONLY), )

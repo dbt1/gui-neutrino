@@ -1,7 +1,7 @@
 #Makefile to build NEUTRINO
 
-NEUTRINO_DEPS  = libcurl libid3tag libmad freetype libjpeg giflib ffmpeg libdvbsi++ libsigc++ liblua 
-NEUTRINO_DEPS += openthreads
+NEUTRINO_DEPS  = libcurl libid3tag libmad freetype libjpeg giflib pugixml ffmpeg libdvbsi++ libsigc++ liblua 
+NEUTRINO_DEPS += openthreads e2fsprogs
 NEUTRINO_DEPS += lua
 NEUTRINO_PKG_DEPS =
 
@@ -129,7 +129,7 @@ endif
 		DEP="$${DEP// /, }" && \
 		sed -i "s/@DEP@/$$DEP/" $(BUILD_TMP)/neutrino-control/control
 ifeq ($(PLATFORM), coolstream)
-	sed -i 's/^\(Depends:.*\)$$/\1, cs-libs, cs-drivers, e2fsprogs, ffmpeg/' $(BUILD_TMP)/neutrino-control/control
+	sed -i 's/^\(Depends:.*\)$$/\1, cs-libs-$(UNCOOL_FLAVOUR), cs-drivers-$(UNCOOL_FLAVOUR), e2fsprogs, ffmpeg/' $(BUILD_TMP)/neutrino-control/control
 endif
 ifeq ($(PLATFORM), azbox)
 	sed -i 's/^\(Depends:.*\)$$/\1, azboxme-dvb-drivers, rmfp_player/' $(BUILD_TMP)/neutrino-control/control

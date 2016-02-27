@@ -1,0 +1,11 @@
+Package: librtmp
+Version: @VER@-1
+Description: RTMP implementation
+Section: extras/libraries
+Priority: optional
+Maintainer: @MAINT@
+Architecture: @ARCH@
+Homepage: http://rtmpdump.mplayerhq.hu
+Source:
+Depends: @DEP@
+Provides: @PROV@

@@ -122,30 +122,68 @@ $(D)/giflib-$(GIFLIB_VER): $(ARCHIVE)/giflib-$(GIFLIB_VER).tar.bz2 | $(TARGETPRE
 
 $(D)/libcurl: $(D)/libcurl-$(CURL_VER)
 	touch $@
-$(D)/libcurl-$(CURL_VER): $(ARCHIVE)/curl-$(CURL_VER).tar.bz2 $(D)/zlib | $(TARGETPREFIX)
+$(D)/libcurl-$(CURL_VER): $(ARCHIVE)/curl-$(CURL_VER).tar.bz2 $(ARCHIVE)/curl-ca-bundle.crt $(D)/openssl $(D)/librtmp $(D)/zlib | $(TARGETPREFIX)
 	$(UNTAR)/curl-$(CURL_VER).tar.bz2
 	set -e; cd $(BUILD_TMP)/curl-$(CURL_VER); \
-		$(CONFIGURE) --prefix= --build=$(BUILD) --host=$(TARGET) \
-			--disable-manual --disable-file --disable-rtsp --disable-dict \
-			--disable-imap --disable-pop3 --disable-smtp --without-ssl \
-			--with-random --mandir=/.remove; \
+		if [ "$(PLATFORM)" = "nevis" ]; then \
+			IPV6="--disable-ipv6"; \
+			CABUNDLE="--with-ca-bundle=/share/curl/curl-ca-bundle.crt"; \
+		else \
+			IPV6="--enable-ipv6"; \
+			CABUNDLE="--with-ca-bundle=/usr/share/curl/curl-ca-bundle.crt"; \
+		fi; \
+		$(BUILDENV) LIBS="-lssl -lcrypto -lrtmp -lz" \
+		./configure \
+			--prefix=${PREFIX} \
+			--build=$(BUILD) \
+			--host=$(TARGET) \
+			--disable-manual \
+			--disable-file \
+			--disable-rtsp \
+			--disable-dict \
+			--disable-imap \
+			--disable-pop3 \
+			--disable-smtp \
+			--enable-shared \
+			--with-random \
+			$$CABUNDLE \
+			$$IPV6 \
+			--with-ssl=$(TARGETPREFIX) \
+			--with-librtmp=$(TARGETPREFIX)/lib \
+			--mandir=/.remove; \
 		$(MAKE) all; \
 		mkdir -p $(HOSTPREFIX)/bin; \
 		sed -e "s,^prefix=,prefix=$(TARGETPREFIX)," < curl-config > $(HOSTPREFIX)/bin/curl-config; \
 		chmod 755 $(HOSTPREFIX)/bin/curl-config; \
 		make install DESTDIR=$(PKGPREFIX)
 	rm $(PKGPREFIX)/bin/curl-config
+	if [ "$(NO_USR_BUILD)" = "1" ]; then \
+		mkdir -p $(PKGPREFIX)/usr; \
+		mv $(PKGPREFIX)/share $(PKGPREFIX)/usr; \
+		ln -sf usr/share $(PKGPREFIX)/share; \
+	fi;
 	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
+	mkdir -p $(TARGETPREFIX)/share/curl
+	cp -a $(ARCHIVE)/curl-ca-bundle.crt $(TARGETPREFIX)/share/curl
 	$(REMOVE)/pkg-lib; mkdir $(BUILD_TMP)/pkg-lib
-	cd $(PKGPREFIX) && rm -r include lib/pkgconfig lib/*.so lib/*a .remove/ && mv lib $(BUILD_TMP)/pkg-lib
-	PKG_VER=$(CURL_VER) $(OPKG_SH) $(CONTROL_DIR)/curl/curl
-	rm -rf $(PKGPREFIX)/*
+	cd $(PKGPREFIX) && rm -rf share usr include lib/pkgconfig lib/*.so lib/*a .remove/ && mv lib $(BUILD_TMP)/pkg-lib
+	PKG_VER=$(CURL_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		$(OPKG_SH) $(CONTROL_DIR)/curl/curl
+	$(RM_PKGPREFIX)
+	mkdir -p $(PKGPREFIX)
 	mv $(BUILD_TMP)/pkg-lib/* $(PKGPREFIX)/
-	PKG_VER=$(CURL_VER) $(OPKG_SH) $(CONTROL_DIR)/curl/libcurl
+	mkdir -p $(PKGPREFIX)/share/curl
+	cp -a $(ARCHIVE)/curl-ca-bundle.crt $(PKGPREFIX)/share/curl
+	PKG_VER=$(CURL_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+		$(OPKG_SH) $(CONTROL_DIR)/curl/libcurl
 	$(REWRITE_LIBTOOL)/libcurl.la
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libcurl.pc
 	rm -rf $(TARGETPREFIX)/.remove
-	$(REMOVE)/curl-$(CURL_VER) $(PKGPREFIX) $(BUILD_TMP)/pkg-lib
+	$(REMOVE)/curl-$(CURL_VER) $(BUILD_TMP)/pkg-lib
+	$(RM_PKGPREFIX)
 	touch $@
 
 # no Package, since it's only linked statically for now also only install static lib
@@ -270,7 +308,7 @@ $(D)/openssl: $(ARCHIVE)/openssl-$(OPENSSL_VER)$(OPENSSL_SUBVER).tar.gz | $(TARG
 	chmod 0755 $(TARGETPREFIX)/lib/libcrypto.so.* $(TARGETPREFIX)/lib/libssl.so.*
 	rm -rf $(PKGPREFIX)
 	mkdir -p $(PKGPREFIX)/lib
-	cp -a $(TARGETPREFIX)/lib/lib{crypto,ssl}.so.$(OPENSSL_VER) $(PKGPREFIX)/lib
+	cp -a $(TARGETPREFIX)/lib/lib{crypto,ssl}.so.* $(PKGPREFIX)/lib
 	$(OPKG_SH) $(CONTROL_DIR)/openssl-libs
 	rm -rf $(PKGPREFIX)
 	touch $@
@@ -854,23 +892,61 @@ $(D)/lua-static: libncurses $(ARCHIVE)/lua-$(LUA_VER).tar.gz \
 	$(REMOVE)/lua-$(LUA_VER)
 	touch $@
 
-$(D)/lua: $(D)/libncurses $(ARCHIVE)/lua-$(LUA_VER).tar.gz | $(TARGETPREFIX)
+#$(D)/lua: $(D)/libncurses $(ARCHIVE)/lua-$(LUA_VER).tar.gz | $(TARGETPREFIX)
+#	$(UNTAR)/lua-$(LUA_VER).tar.gz
+#	set -e; cd $(BUILD_TMP)/lua-$(LUA_VER); \
+#		$(PATCH)/lua-01-fix-coolstream-build.patch; \
+#		$(PATCH)/lua-02-shared-libs-for-lua.patch; \
+#		$(PATCH)/lua-03-lua-pc.patch; \
+#		$(PATCH)/lua-04-lua-lvm.c.patch; \
+#		$(MAKE) linux PKG_VERSION=$(LUA_VER) CC=$(TARGET)-gcc LD=$(TARGET)-ld AR="$(TARGET)-ar rcu" RANLIB=$(TARGET)-ranlib LDFLAGS="-L$(TARGETPREFIX)/lib"; \
+#		sed -i 's/^V=.*/V= $(LUA_ABIVER)/' etc/lua.pc; \
+#		sed 's/^R=.*/R= $(LUA_VER)/' etc/lua.pc > $(PKG_CONFIG_PATH)/lua.pc; \
+#		$(MAKE) install INSTALL_TOP=$(TARGETPREFIX)
+#	cp -a $(BUILD_TMP)/lua-$(LUA_VER)/src/liblua.so* $(TARGETPREFIX)/lib
+#	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/lua.pc
+#	rm -rf $(TARGETPREFIX)/bin/lua
+#	rm -rf $(TARGETPREFIX)/bin/luac
+#	$(REMOVE)/lua-$(LUA_VER)
+#	touch $@
+	
+$(D)/lua: $(HOSTPREFIX)/bin/lua-$(LUA_VER) $(D)/libncurses $(ARCHIVE)/lua-$(LUA_VER).tar.gz | $(TARGETPREFIX)
+	$(REMOVE)/lua-$(LUA_VER) $(PKGPREFIX)
 	$(UNTAR)/lua-$(LUA_VER).tar.gz
-	set -e; cd $(BUILD_TMP)/lua-$(LUA_VER); \
-		$(PATCH)/lua-01-fix-coolstream-build.patch; \
-		$(PATCH)/lua-02-shared-libs-for-lua.patch; \
-		$(PATCH)/lua-03-lua-pc.patch; \
-		$(PATCH)/lua-04-lua-lvm.c.patch; \
-		$(MAKE) linux PKG_VERSION=$(LUA_VER) CC=$(TARGET)-gcc LD=$(TARGET)-ld AR="$(TARGET)-ar rcu" RANLIB=$(TARGET)-ranlib LDFLAGS="-L$(TARGETPREFIX)/lib"; \
-		sed -i 's/^V=.*/V= $(LUA_ABIVER)/' etc/lua.pc; \
-		sed 's/^R=.*/R= $(LUA_VER)/' etc/lua.pc > $(PKG_CONFIG_PATH)/lua.pc; \
-		$(MAKE) install INSTALL_TOP=$(TARGETPREFIX)
-	cp -a $(BUILD_TMP)/lua-$(LUA_VER)/src/liblua.so* $(TARGETPREFIX)/lib
+	set -e; cd $(BUILD_TMP)/lua-$(LUA_VER) && \
+		$(PATCH)/$(PLATFORM)/lua-01-fix-coolstream-build.patch && \
+		$(PATCH)/lua-02-shared-libs-for-lua.patch && \
+		$(PATCH)/lua-03-lua-pc.patch && \
+		$(PATCH)/lua-lvm.c.diff && \
+		sed -i 's/^V=.*/V= $(LUA_ABIVER)/' etc/lua.pc && \
+		sed -i 's/^R=.*/R= $(LUA_VER)/' etc/lua.pc; \
+		if [ 0 ]; then \
+			if [ ! "$(PLATFORM)" = "nevis" ]; then \
+				$(PATCH)/lua-01a-fix-coolstream-eglibc-build.patch; \
+			fi; \
+		fi; \
+		$(MAKE) linux PKG_VERSION=$(LUA_VER) CC=$(TARGET)-gcc LD=$(TARGET)-ld AR="$(TARGET)-ar r" RANLIB=$(TARGET)-ranlib LDFLAGS="-L$(TARGETPREFIX)/lib" && \
+		$(MAKE) install INSTALL_TOP=$(PKGPREFIX); \
+		$(MAKE) install INSTALL_TOP=$(TARGETPREFIX); \
+	install -m 0755 -D $(BUILD_TMP)/lua-$(LUA_VER)/src/liblua.so.$(LUA_VER) $(TARGETPREFIX)/lib/liblua.so.$(LUA_VER)
+	cd $(TARGETPREFIX)/lib; ln -sf liblua.so.$(LUA_VER) $(TARGETPREFIX)/lib/liblua.so
+	install -m 0644 -D $(BUILD_TMP)/lua-$(LUA_VER)/etc/lua.pc $(PKG_CONFIG_PATH)/lua.pc
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/lua.pc
-	rm -rf $(TARGETPREFIX)/bin/lua
-	rm -rf $(TARGETPREFIX)/bin/luac
+	install -m 0755 -D $(BUILD_TMP)/lua-$(LUA_VER)/src/liblua.so.$(LUA_VER) $(PKGPREFIX)/lib/liblua.so.$(LUA_VER)
+	rm -rf $(PKGPREFIX)/.remove
+	rm -rf $(PKGPREFIX)/include
+	rm -f $(PKGPREFIX)/lib/*.a
+	rm -f $(TARGETPREFIX)/lib/liblua.a
+	rm -rf $(TARGETPREFIX)/.remove
+	cd $(PKGPREFIX)/lib; ln -sf liblua.so.$(LUA_VER) $(PKGPREFIX)/lib/liblua.so
+	PKG_VER=$(LUA_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+			$(OPKG_SH) $(CONTROL_DIR)/lua
 	$(REMOVE)/lua-$(LUA_VER)
-	touch $@
+	$(RM_PKGPREFIX)
+	touch $@ 
+
 
 
 $(D)/mrua: $(ARCHIVE)/azboxme-mrua-3.11-1.tar.gz openssl libungif
@@ -939,14 +1015,45 @@ $(D)/liblua: $(D)/luaposix
 	mkdir -p $(PKGPREFIX)/lib/lua/$(LUA_ABIVER)
 	mkdir -p $(PKGPREFIX)/share/lua/$(LUA_ABIVER)
 	cp -a $(TARGETPREFIX)/lib/liblua.so* $(PKGPREFIX)/lib
-	cp -a $(TARGETPREFIX)/lib/lua/$(LUA_ABIVER)/posix_c.so $(PKGPREFIX)/lib/lua/$(LUA_ABIVER)
-	cp -a $(TARGETPREFIX)/share/lua/$(LUA_ABIVER)/posix.lua $(PKGPREFIX)/share/lua/$(LUA_ABIVER)
+	cp -a $(TARGETPREFIX)/lib/lua/$(LUA_ABIVER)/*.so $(PKGPREFIX)/lib/lua/$(LUA_ABIVER)
+	cp -a $(TARGETPREFIX)/share/lua/$(LUA_ABIVER)/*.lua $(PKGPREFIX)/share/lua/$(LUA_ABIVER)
 	PKG_VER=$(LUA_VER) \
 		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)/lib` \
 		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
 		$(OPKG_SH) $(CONTROL_DIR)/liblua
 	rm -rf $(PKGPREFIX)
 	touch $@
+
+#$(D)/luaposix: $(D)/lua $(ARCHIVE)/luaposix-$(LUAPOSIX_VER).tar.bz2 | $(TARGETPREFIX)
+#	$(RM_PKGPREFIX)
+#	$(UNTAR)/luaposix-$(LUAPOSIX_VER).tar.bz2
+#	set -e; cd $(BUILD_TMP)/luaposix-$(LUAPOSIX_VER); \
+#		$(PATCH)/luaposix-fix-build.patch && \
+#		$(PATCH)/luaposix-fix-docdir-build.patch; \
+#		export LUA=$(HOSTPREFIX)/bin/lua-$(LUA_VER) && \
+#		$(CONFIGURE) --prefix= \
+#			--exec-prefix= \
+#			--libdir=/lib/lua/$(LUA_ABIVER) \
+#			--datarootdir=/share/lua/$(LUA_ABIVER) \
+#			--mandir=/.remove \
+#			--docdir=/.remove \
+#			--enable-silent-rules \
+#			--without-ncursesw && \
+#		$(MAKE) && \
+#		$(MAKE) install DESTDIR=$(PKGPREFIX)
+#	rm -fr $(PKGPREFIX)/.remove
+#	cp -frd $(PKGPREFIX)/lib/* $(TARGETPREFIX)/lib
+#	cp -frd $(PKGPREFIX)/share/* $(TARGETPREFIX)/share
+#	$(REWRITE_LIBTOOL)/lua/$(LUA_ABIVER)/curses_c.la
+#	$(REWRITE_LIBTOOL)/lua/$(LUA_ABIVER)/posix_c.la
+#	rm -fr $(PKGPREFIX)/lib/lua/$(LUA_ABIVER)/*.la
+#	PKG_VER=$(LUA_VER) \
+#		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+#		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+#			$(OPKG_SH) $(CONTROL_DIR)/luaposix
+#	$(REMOVE)/luaposix-$(LUAPOSIX_VER) $(TARGETPREFIX)/.remove
+#	$(RM_PKGPREFIX)
+#	touch $@
 
 $(D)/luaposix: $(HOSTPREFIX)/bin/lua-$(LUA_VER) $(D)/lua $(ARCHIVE)/luaposix-v$(LUAPOSIX_VER).tar.gz $(ARCHIVE)/slingshot-v$(SLINGSHOT_VER).tar.gz | $(TARGETPREFIX)
 	$(UNTAR)/luaposix-v$(LUAPOSIX_VER).tar.gz
@@ -968,16 +1075,29 @@ $(D)/luaposix: $(HOSTPREFIX)/bin/lua-$(LUA_VER) $(D)/lua $(ARCHIVE)/luaposix-v$(
 		$(MAKE); \
 		$(MAKE) all check install
 	$(REMOVE)/luaposix-$(LUAPOSIX_VER) $(TARGETPREFIX)/.remove
+	cp -frd $(PKGPREFIX)/lib/* $(TARGETPREFIX)/lib
+	cp -frd $(PKGPREFIX)/share/* $(TARGETPREFIX)/share
+	$(REWRITE_LIBTOOL)/lua/$(LUA_ABIVER)/curses_c.la
+	$(REWRITE_LIBTOOL)/lua/$(LUA_ABIVER)/posix_c.la
+	rm -fr $(PKGPREFIX)/lib/lua/$(LUA_ABIVER)/*.la
+	PKG_VER=$(LUA_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+			$(OPKG_SH) $(CONTROL_DIR)/luaposix
+	$(REMOVE)/luaposix-$(LUAPOSIX_VER) $(TARGETPREFIX)/.remove
+	$(RM_PKGPREFIX)
 	touch $@
 
 # helper for luaposix build
+
+
 $(HOSTPREFIX)/bin/lua-$(LUA_VER): $(ARCHIVE)/lua-$(LUA_VER).tar.gz | $(TARGETPREFIX)
 	$(UNTAR)/lua-$(LUA_VER).tar.gz
-	set -e; cd $(BUILD_TMP)/lua-$(LUA_VER); \
-		$(PATCH)/lua-01-fix-coolstream-build.patch; \
+	cd $(BUILD_TMP)/lua-$(LUA_VER) && \
+		$(PATCH)/$(PLATFORM)/lua-01-fix-coolstream-build.patch && \
 		$(MAKE) linux
 	install -m 0755 -D $(BUILD_TMP)/lua-$(LUA_VER)/src/lua $@
-	$(REMOVE)/lua-$(LUA_VER)
+	$(REMOVE)/lua-$(LUA_VER) $(TARGETPREFIX)/.remove
 
 
 #libbluray open-source library designed for Blu-Ray Discs playback for media players
@@ -1017,6 +1137,60 @@ $(D)/libbluray-$(LIBBLURAY_VER): $(ARCHIVE)/libbluray-$(LIBBLURAY_VER).tar.bz2 $
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libbluray.pc
 	$(REMOVE)/libbluray-$(LIBBLURAY_VER) $(PKGPREFIX)
 	touch $@
+	
+	
+$(D)/pugixml: $(ARCHIVE)/pugixml-$(PUGIXML_VER).tar.gz | $(TARGETPREFIX)
+	rm -fr $(BUILD_TMP)/pugixml-$(PUGIXML_VER)
+	$(RM_PKGPREFIX)
+	$(UNTAR)/pugixml-$(PUGIXML_VER).tar.gz
+	set -e; cd $(BUILD_TMP)/pugixml-$(PUGIXML_VER); \
+		cmake \
+		--no-warn-unused-cli \
+		-DCMAKE_INSTALL_PREFIX=$(PKGPREFIX) \
+		-DBUILD_SHARED_LIBS=ON \
+		-DCMAKE_BUILD_TYPE=Linux \
+		-DCMAKE_C_COMPILER=$(TARGET)-gcc \
+		-DCMAKE_CXX_COMPILER=$(TARGET)-g++ \
+		scripts; \
+		$(MAKE); \
+		make install
+	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
+	rm -fr $(PKGPREFIX)/lib/cmake $(PKGPREFIX)/lib/*.so $(PKGPREFIX)/include
+	PKG_VER=$(PUGIXML_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+			$(OPKG_SH) $(CONTROL_DIR)/libpugixml
+	rm -fr $(BUILD_TMP)/pugixml-$(PUGIXML_VER)
+	$(RM_PKGPREFIX)
+	touch $@	
 
+$(D)/librtmp: $(D)/zlib $(ARCHIVE)/rtmpdump-$(LIBRTMP_VER).tgz | $(TARGETPREFIX)
+	rm -fr $(BUILD_TMP)/rtmpdump-$(LIBRTMP_VER)
+	$(RM_PKGPREFIX)
+	$(UNTAR)/rtmpdump-$(LIBRTMP_VER).tgz
+	mkdir -p $(PKGPREFIX)/lib
+	set -e; cd $(BUILD_TMP)/rtmpdump-$(LIBRTMP_VER); \
+		sed -i "s!^prefix=.*!prefix=$(DEFAULT_PREFIX)!;" Makefile; \
+		sed -i "s!^prefix=.*!prefix=$(DEFAULT_PREFIX)!;" librtmp/Makefile; \
+		$(MAKE) \
+			CROSS_COMPILE=$(TARGET)- \
+			XCFLAGS="-I$(TARGETPREFIX)/include -I$(TARGETPREFIX)/include " \
+			LDFLAGS="-L$(TARGETPREFIX)/lib -L$(TARGETPREFIX)/lib" \
+			; \
+		make install DESTDIR=$(PKGPREFIX)
+	rm -fr $(PKGPREFIX)/man
+	rm -fr $(PKGPREFIX)/sbin
+	cp -frd $(PKGPREFIX)/* $(TARGETPREFIX)
+	rm -fr $(PKGPREFIX)/include
+	rm -fr $(PKGPREFIX)/lib/pkgconfig
+	rm -f $(PKGPREFIX)/lib/*.a
+	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/librtmp.pc
+	PKG_VER=$(LIBRTMP_VER) \
+		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
+		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
+			$(OPKG_SH) $(CONTROL_DIR)/librtmp
+	$(REMOVE)/rtmpdump-$(LIBRTMP_VER)
+	$(RM_PKGPREFIX)
+	touch $@
 
 PHONY += ncurses-prereq rmfp_player

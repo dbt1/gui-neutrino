@@ -420,6 +420,7 @@ $(D)/dropbear: $(ARCHIVE)/dropbear-$(DROPBEAR-VER).tar.bz2 | $(TARGETPREFIX)
 	touch $@
 
 $(DEPDIR)/opkg: $(ARCHIVE)/opkg-$(OPKG_VER).tar.bz2 | $(TARGETPREFIX)
+	$(REMOVE)/opkg-$(OPKG_VER)
 	$(UNTAR)/opkg-$(OPKG_VER).tar.bz2
 	set -e; cd $(BUILD_TMP)/opkg-$(OPKG_VER); \
 		autoreconf -v --install; \
@@ -447,13 +448,13 @@ $(DEPDIR)/opkg: $(ARCHIVE)/opkg-$(OPKG_VER).tar.bz2 | $(TARGETPREFIX)
 		cp -a src/opkg-cl $(HOSTPREFIX)/bin
 	install -d -m 0755 $(PKGPREFIX)/var/lib/opkg
 	install -d -m 0755 $(PKGPREFIX)/etc/opkg
-	ln -s opkg-cl $(PKGPREFIX)/bin/opkg # convenience symlink
+	ln -sf opkg-cl $(PKGPREFIX)/bin/opkg # convenience symlink, compatibility
 	echo "# example config file, copy to opkg.conf and edit" > $(PKGPREFIX)/etc/opkg/opkg.conf.example
 	echo "src server http://server/dist/$(PLATFORM)" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
 	echo "# add an optional cache directory, important if not enough flash memory is available!" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
 	echo "# directory must exist before executing of opkg" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
-	echo "option cache /tmp/media/sda1/.opkg" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
-	$(REMOVE)/opkg-$(OPKG_VER) $(PKGPREFIX)/.remove
+	echo "option cache /tmp/media/sda1/.opkg_cache" >> $(PKGPREFIX)/etc/opkg/opkg.conf.example
+	$(REMOVE)/opkg-$(OPKG_VER) $(PKGPREFIX)/.remove $(PKGPREFIX)/bin/opkg-key
 	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libopkg.pc
 	rm -rf $(PKGPREFIX)/lib $(PKGPREFIX)/include
@@ -570,6 +571,7 @@ $(D)/libxslt-$(LIBXLST_VER): libxml2 $(ARCHIVE)/libxslt-$(LIBXLST_VER).tar.gz | 
 	mkdir -p $(PKGPREFIX)/lib
 	cp -a $(TARGETPREFIX)/lib/libxslt.* $(TARGETPREFIX)/lib/libexslt.* $(PKGPREFIX)/lib
 	rm -rf $(TARGETPREFIX)/.remove
+	rm -rf $(PKGPREFIX)/.directory
 	$(REWRITE_LIBTOOL)/libexslt.la
 	$(REWRITE_LIBTOOL)/libxslt.la
 	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/libexslt.pc
@@ -608,6 +610,7 @@ $(D)/libxml2-$(LIBXML2_VER): $(D)/zlib $(ARCHIVE)/libxml2-$(LIBXML2_VER).tar.gz 
 		$(MAKE) ; \
 		$(MAKE) install DESTDIR=$(PKGPREFIX)
 	#cd $(PKGPREFIX)/share
+	rm -rf $(PKGPREFIX)/.remove
 	cp -a $(PKGPREFIX)/* $(TARGETPREFIX)
 	ln -sf ./libxml2/libxml $(TARGETPREFIX)/include/libxml
 	mv $(TARGETPREFIX)/bin/xml2-config $(HOSTPREFIX)/bin
