@@ -49,7 +49,23 @@ CURL_VER=7.28.0
 PNG_VER=1.6.15
 
 # freetype; free, high-quality and portable Font engine
-FREETYPE_VER=2.5.0.1
+# freetype; free, high-quality and portable Font engine
+FREETYPE_MAJOR=2
+FREETYPE_MINOR=6
+FREETYPE_MICRO=3
+FREETYPE_NANO=n/a
+ifeq ($(FREETYPE_MICRO), n/a)
+FREETYPE_VER_PATH=$(FREETYPE_MAJOR).$(FREETYPE_MINOR)
+else
+FREETYPE_VER_PATH=$(FREETYPE_MAJOR).$(FREETYPE_MINOR).$(FREETYPE_MICRO)
+endif
+ifeq ($(FREETYPE_NANO), n/a)
+FREETYPE_VER=$(FREETYPE_VER_PATH)
+else
+FREETYPE_VER=$(FREETYPE_VER_PATH).$(FREETYPE_NANO)
+endif
+
+FREETYPE_VER_OLD=2.3.12
 
 # libjpeg-turbo; a derivative of libjpeg for x86 and x86-64 processors which uses SIMD instructions (MMX, SSE2, etc.) to accelerate baseline JPEG compression and decompression
 JPEG_TURBO_VER=1.4.0
@@ -69,9 +85,9 @@ OPENSSL_SUBVER=
 ifneq ($(PLATFORM), coolstream)
 FFMPEG_VER=2.1.3
 else
-FFMPEG_GITREV=$(shell if  test -d $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; then $(BASE_DIR)/scripts/opkg-get_git_info.sh $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; fi)
-FFMPEG_VERSION=$(shell if  test -d $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; then cat $(UNCOOL_GIT)/cst-public-libraries-ffmpeg/VERSION; fi)
-FFMPEG_VER=$(FFMPEG_VERSION)-$(FFMPEG_GITREV)
+CST_FFMPEG_BRANCH=$(shell echo `cd $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; git rev-parse --abbrev-ref HEAD`)
+CST_FFMPEG_GITVERSION=$(shell echo `cd $(UNCOOL_GIT)/cst-public-libraries-ffmpeg; git describe --always --tags --dirty --first-parent`)
+FFMPEG_VER=$(CST_FFMPEG_GITVERSION)-$(CST_FFMPEG_BRANCH)
 endif
 
 # libogg; encoding, decoding of the ogg file format

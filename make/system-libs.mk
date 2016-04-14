@@ -223,26 +223,53 @@ $(D)/libpng-$(PNG_VER): $(ARCHIVE)/libpng-$(PNG_VER).tar.xz $(D)/zlib | $(TARGET
 	rm -rf $(PKGPREFIX)
 	touch $@
 
+FT_RENDER = subpix_render
+#FT_RENDER = subpix_hint
+#FT_RENDER = render_old
+
+ifeq ($(FT_RENDER), subpix_render)
+FT_RENDER_PATCH = freetype_2.5_subpix_render.diff
+endif
+ifeq ($(FT_RENDER), subpix_hint)
+FT_RENDER_PATCH = freetype_2.5_subpix_hint.diff
+endif
+ifeq ($(FT_RENDER), render_old)
+FT_RENDER_PATCH = freetype_2.5_render_old.diff
+endif
+
 $(D)/freetype: $(D)/freetype-$(FREETYPE_VER)
 	touch $@
 $(D)/freetype-$(FREETYPE_VER): $(D)/libpng $(ARCHIVE)/freetype-$(FREETYPE_VER).tar.bz2 | $(TARGETPREFIX)
-	$(REMOVE)/freetype-$(FREETYPE_VER)
 	$(UNTAR)/freetype-$(FREETYPE_VER).tar.bz2
 	set -e; cd $(BUILD_TMP)/freetype-$(FREETYPE_VER); \
 		if ! echo $(FREETYPE_VER) | grep "2.3"; then \
-			patch -p1 -i $(PATCHES)/freetype_2.5_render_old.diff; \
-			patch -p1 -i $(PATCHES)/freetype_2.5_subpix_hint.diff; \
+			if [ ! -d include/freetype ]; then \
+				mkdir -p include/freetype; \
+				ln -sf ../config include/freetype/config; \
+			fi; \
+			$(PATCH)/$(FT_RENDER_PATCH); \
 		fi; \
 		sed -i '/#define FT_CONFIG_OPTION_OLD_INTERNALS/d' include/freetype/config/ftoption.h; \
 		sed -i '/^FONT_MODULES += \(type1\|cid\|pfr\|type42\|pcf\|bdf\)/d' modules.cfg; \
-		$(CONFIGURE) --prefix=$(TARGETPREFIX) --build=$(BUILD) --host=$(TARGET); \
+		$(CONFIGURE) --prefix= --build=$(BUILD) --host=$(TARGET); \
 		$(MAKE) all; \
+		sed -e "s,^prefix=\"\",prefix=," < builds/unix/freetype-config > $(HOSTPREFIX)/bin/freetype-config.tmp; \
+		sed -e "s,^prefix=,prefix=$(TARGETPREFIX)\nSYSROOT=$(TARGETPREFIX)," < $(HOSTPREFIX)/bin/freetype-config.tmp > $(HOSTPREFIX)/bin/freetype-config; \
+		rm -f $(HOSTPREFIX)/bin/freetype-config.tmp; \
+		chmod 755 $(HOSTPREFIX)/bin/freetype-config; \
 		rm -f $(TARGETPREFIX)/lib/libfreetype.so*; \
-		make install; \
+		make install libdir=$(TARGETPREFIX)/lib includedir=$(TARGETPREFIX)/include bindir=$(TARGETPREFIX)/bin prefix=$(TARGETPREFIX)
 		if [ -d $(TARGETPREFIX)/include/freetype2/freetype ] ; then \
 			ln -sf ./freetype2/freetype $(TARGETPREFIX)/include/freetype; \
-		fi;
-	mv $(TARGETPREFIX)/bin/freetype-config $(HOSTPREFIX)/bin/freetype-config
+		else \
+			if [ ! -e $(TARGETPREFIX)/include/freetype ] ; then \
+				ln -sf freetype2 $(TARGETPREFIX)/include/freetype; \
+			fi; \
+		fi; \
+		ln -sf freetype2/ft2build.h $(TARGETPREFIX)/include/ft2build.h;
+	rm $(TARGETPREFIX)/bin/freetype-config
+	$(REWRITE_LIBTOOL)/libfreetype.la
+	$(REWRITE_PKGCONF) $(PKG_CONFIG_PATH)/freetype2.pc
 	$(REMOVE)/freetype-$(FREETYPE_VER) $(PKGPREFIX)
 	mkdir -p $(PKGPREFIX)/lib
 	cp -a $(TARGETPREFIX)/lib/libfreetype.so.* $(PKGPREFIX)/lib
@@ -250,8 +277,9 @@ $(D)/freetype-$(FREETYPE_VER): $(D)/libpng $(ARCHIVE)/freetype-$(FREETYPE_VER).t
 		PKG_DEP=`opkg-find-requires.sh $(PKGPREFIX)` \
 		PKG_PROV=`opkg-find-provides.sh $(PKGPREFIX)` \
 		$(OPKG_SH) $(CONTROL_DIR)/libfreetype
-	rm -rf $(PKGPREFIX)
+	$(RM_PKGPREFIX)
 	touch $@
+
 
 ## build both libjpeg.so.62 and libjpeg.so.8
 ## use only libjpeg.so.62 for our own build, but keep libjpeg8 for
@@ -378,6 +406,7 @@ FFMPEG_CONFIGURE = \
 --enable-decoder=subviewer1 \
 --enable-decoder=xsub \
 --enable-decoder=pgssub \
+--enable-decoder=movtext \
 --enable-decoder=mp3 \
 --enable-decoder=flac \
 --enable-decoder=vorbis \
@@ -415,7 +444,22 @@ FFMPEG_CONFIGURE = \
 --disable-programs \
 --disable-static \
 --disable-filters \
---disable-protocols \
+--enable-librtmp \
+--disable-protocol=data \
+--disable-protocol=cache \
+--disable-protocol=concat \
+--disable-protocol=crypto \
+--disable-protocol=ftp \
+--disable-protocol=gopher \
+--disable-protocol=httpproxy \
+--disable-protocol=pipe \
+--disable-protocol=sctp \
+--disable-protocol=srtp \
+--disable-protocol=subfile \
+--disable-protocol=unix \
+--disable-protocol=md5 \
+--disable-protocol=hls \
+--enable-openssl \
 --enable-protocol=file \
 --enable-protocol=http \
 --enable-protocol=rtmp \
@@ -424,6 +468,9 @@ FFMPEG_CONFIGURE = \
 --enable-protocol=rtmpte \
 --enable-protocol=mmsh \
 --enable-protocol=mmst \
+--enable-protocol=rtp \
+--enable-protocol=tcp \
+--enable-protocol=udp \
 --enable-bsfs \
 --disable-devices \
 --enable-swresample \
@@ -439,9 +486,7 @@ FFMPEG_CONFIGURE = \
 --enable-stripping \
 --target-os=linux \
 --arch=arm \
---disable-neon \
---enable-libbluray \
---enable-protocol=bluray
+--disable-neon
 endif
 ifeq ($(BOXARCH), powerpc)
 FFMPEG_CONFIGURE  = --arch=ppc
@@ -491,7 +536,7 @@ $(D)/ffmpeg-$(FFMPEG_VER): $(ARCHIVE)/ffmpeg-$(FFMPEG_VER).tar.bz2 | $(TARGETPRE
 	$(UNTAR)/ffmpeg-$(FFMPEG_VER).tar.bz2
 endif
 	set -e; cd $(BUILD_TMP)/ffmpeg-$(FFMPEG_VER); \
-		sed -i '/\(__DATE__\|__TIME__\)/d' ffprobe.c; # remove build time \
+		sed -i '/\(__DATE__\|__TIME__\)/d' ffprobe.c; \
 		sed -i -e 's/__DATE__/""/' -e 's/__TIME__/""/' cmdutils.c; \
 		./configure \
 			--disable-encoders \
