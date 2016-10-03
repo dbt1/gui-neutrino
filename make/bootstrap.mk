@@ -48,13 +48,13 @@ $(TARGETPREFIX):
 	@false
 
 $(HOSTPREFIX):
-	mkdir $@
+	mkdir -p $@
 
 $(STL_ARCHIVE):
-	mkdir $@
+	mkdir -p $@
 
 $(HOSTPREFIX)/bin: $(HOSTPREFIX)
-	mkdir $@
+	mkdir -p $@
 
 $(HOSTPREFIX)/bin/unpack%.sh \
 $(HOSTPREFIX)/bin/get%.sh \
