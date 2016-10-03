@@ -16,6 +16,7 @@
 # the size in million bytes, hopefully smaller than the USB stick ;)
 SIZE=500
 
+#set -x
 # get PLATFORM from the config file...
 eval `sed -n '/^PLATFORM[[:space:]*]=/{s/[[:space:]*]//g;p}' config 2>/dev/null`
 if [ x$PLATFORM = xspark ]; then
@@ -36,7 +37,7 @@ fi
 rm -f build_tmp/usb.img
 dd if=/dev/zero of=build_tmp/usb.img bs=1 count=1 seek=$(($SIZE * 1000000 - 1))
 
-# add partitions
+echo "add partitions"
 # kernel partition's size in sectors (actually it's 1MB smaller due to
 # the 2048 sectors start offset for alignment)
 KPARTSIZE=$((16*1024*2))
@@ -52,12 +53,12 @@ kpartx -v -a -p -usbstick- build_tmp/usb.img
 udevadm settle
 
 # create the filesystems
-mkdosfs   -n KERNEL  /dev/mapper/*-usbstick-1
-mkfs.ext3 -L root-fs /dev/mapper/*-usbstick-2
+mkdosfs   -v -n KERNEL  /dev/mapper/*-usbstick-1
+mkfs.ext3 -v -L root-fs /dev/mapper/*-usbstick-2
 
 # mount the partitions
-mount /dev/mapper/*-usbstick-1 build_tmp/usbstick/p1
-mount /dev/mapper/*-usbstick-2 build_tmp/usbstick/p2
+mount -v /dev/mapper/*-usbstick-1 build_tmp/usbstick/p1
+mount -v /dev/mapper/*-usbstick-2 build_tmp/usbstick/p2
 
 # just check if the directory is here, is easier than reliably
 # propagating TARGET into sudo...
@@ -92,3 +93,7 @@ echo "the usb boot image is now in build_tmp/usb.img"
 echo
 ls -l build_tmp/usb.img
 echo
+
+#STAMP=`date +%Y-%m-%d_%H-%M`
+STAMP=$1
+cp -v build_tmp/usb.img build_tmp/usb_$STAMP.img

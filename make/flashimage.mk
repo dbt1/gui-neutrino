@@ -28,6 +28,9 @@ endif
 
 flash-prepare: local-install find-mkfs.jffs2 find-sumtool
 
+usbimage:
+	$(BASE_DIR)/scripts/mkusbimage.sh $(TIME)_$(BOXARCH)_$(PLATFORM)
+
 flash-build: 
 	echo "/dev/console c 0644 0 0 5 1 0 0 0" > $(BUILD_TMP)/devtable
 	ln -sf /share/zoneinfo/CET $(BUILD_TMP)/install/etc/localtime # CET is the default in a fresh neutrino install
