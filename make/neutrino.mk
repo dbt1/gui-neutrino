@@ -79,7 +79,7 @@ GITVERSION=`cd $(N_HD_SOURCE); git describe --always --tags --dirty --first-pare
 
 
 ifneq ($(FLAVOUR), neutrino-mp)
-HOMEPAGE = "http://gitorious.org/neutrino-hd"
+HOMEPAGE = "http://personal.neutrino-hd.de"
 IMGNAME  = "Neutrino-HD"
 else
 HOMEPAGE = "http://gitorious.org/neutrino-mp"
