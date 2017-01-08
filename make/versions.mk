@@ -51,8 +51,8 @@ PNG_VER=1.6.21
 # freetype; free, high-quality and portable Font engine
 # freetype; free, high-quality and portable Font engine
 FREETYPE_MAJOR=2
-FREETYPE_MINOR=6
-FREETYPE_MICRO=3
+FREETYPE_MINOR=7
+FREETYPE_MICRO=1
 FREETYPE_NANO=n/a
 ifeq ($(FREETYPE_MICRO), n/a)
 FREETYPE_VER_PATH=$(FREETYPE_MAJOR).$(FREETYPE_MINOR)

@@ -228,7 +228,7 @@ FT_RENDER = subpix_render
 #FT_RENDER = render_old
 
 ifeq ($(FT_RENDER), subpix_render)
-FT_RENDER_PATCH = freetype_2.5_subpix_render.diff
+FT_RENDER_PATCH = freetype_2.7.1_subpix_render.diff
 endif
 ifeq ($(FT_RENDER), subpix_hint)
 FT_RENDER_PATCH = freetype_2.5_subpix_hint.diff
