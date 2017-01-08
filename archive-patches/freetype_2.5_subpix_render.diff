@@ -1,5 +1,5 @@
---- a/include/freetype/config/ftoption.h.org	2013-06-19 23:20:04.000000000 +0200
-+++ b/include/freetype/config/ftoption.h	2013-07-12 14:46:54.504836678 +0200
+--- a/include/freetype/config/ftoption.h
++++ b/include/freetype/config/ftoption.h
 @@ -92,7 +92,7 @@
    /* This is done to allow FreeType clients to run unmodified, forcing     */
    /* them to display normal gray-level anti-aliased glyphs.                */
